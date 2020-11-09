@@ -476,7 +476,7 @@ namespace JinQuanAdmin
             {
                 using (var crawle = new NewCrawle())
                 {
-
+                    string filePath = GetNewPath($"-{menuTypesSets.First().GetDescription()}替换");
                     foreach (var account in accounts)
                     {
 
@@ -529,10 +529,8 @@ namespace JinQuanAdmin
                         includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
                         account.Included = includedMessage;
                         WriteLogger(includedMessage);
+                        WriteTxt(filePath, account);
                     }
-
-                    string filePath = GetNewPath($"-{menuTypesSets.First().GetDescription()}替换");
-                    WriteTxt(filePath, accounts);
                     WriteLogger($"已导出文件{filePath}");
                     WriteLogger($"执行结束");
                     SetControllerEnable(true);
@@ -655,6 +653,16 @@ namespace JinQuanAdmin
             fs.Close();
         }
 
+        public void WriteTxt(string path, Account account)
+        {
+            var bytes = System.Text.Encoding.Default.GetBytes(account.ToString());
+            using (var stream = new FileStream(path, FileMode.Append, FileAccess.Write))
+            {
+                stream.Write(bytes, 0, bytes.Length);
+            }
+
+        }
+
         private Task CreateCrawle(List<Account> accounts, Action<List<Account>> action)
         {
             return Task.Run(() =>
@@ -677,6 +685,7 @@ namespace JinQuanAdmin
 
         private void btn_phone_Click(object sender, EventArgs e)
         {
+
             if (!isHasFilePath())
             {
                 return;
@@ -717,7 +726,7 @@ namespace JinQuanAdmin
             {
                 return;
             }
-
+            string filePath = GetNewPath($"-锚点图片");
             var accounts = GetAccounts();
             if (accounts == null || !accounts.Any())
             {
@@ -759,6 +768,8 @@ namespace JinQuanAdmin
                                 }
                             }
                             WriteLogger("获取图片结束");
+               
+                            WriteTxt(filePath, account);
                         }
                     }
                     catch (Exception ex)
@@ -766,12 +777,7 @@ namespace JinQuanAdmin
                         WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
                         SetControllerEnable(true);
                         return;
-                    }
-
-
-
-                    string filePath = GetNewPath($"-锚点图片");
-                    WriteTxt(filePath, accounts);
+                    }   
                     SetControllerEnable(true);
                     WriteLogger($"已导出文件{filePath}");
                     WriteLogger("执行结束");
@@ -790,13 +796,13 @@ namespace JinQuanAdmin
             try
             {
 
-                WriteTxt("开始加载文件中账号");
+                WriteLogger("开始加载文件中账号");
                 var list = TxtHelper.GetAccounts(FilePath);
                 if (!list.Any())
                 {
-                    WriteTxt("文件读取到账号请检查文件");
+                    WriteLogger("文件读取到账号请检查文件");
                 }
-                WriteTxt($"账号加载结束,加载账号数{list.Count}");
+                WriteLogger($"账号加载结束,加载账号数{list.Count}");
                 return list;
             }
             catch (Exception e)
