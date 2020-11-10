@@ -49,6 +49,7 @@ namespace JinQuanAdmin.Crawler
             catch (Exception e)
             {
                 driverService.Dispose();
+                LogHelper.LogAction.Invoke($"浏览器启动失败");
                 throw e;
             }
         }
@@ -73,13 +74,12 @@ namespace JinQuanAdmin.Crawler
                 _webDriver.FindElement(By.Id(loing_name_id), 10).SendKeys(username);
                 _webDriver.FindElement(By.Id(loing_pwd_id), 10).SendKeys(pwd);
                 _webDriver.FindElement(By.Id(loing_submit_id), 10).Click();
+                Thread.Sleep(3_000);
                 if (!_webDriver.Url.EndsWith("AdminIndex.aspx"))
                 {
                     return false;
-                }
-                Thread.Sleep(3_000);
+                }            
                 closeAllALert();
-
                 _webDriver.Navigate().GoToUrl(back_url);
                 LogHelper.LogAction.Invoke("登录成功");
                 //_webDriver.FindElement(By.XPath(manager_list_xpath), 10).Click();
