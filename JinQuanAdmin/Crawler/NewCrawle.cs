@@ -23,9 +23,9 @@ namespace JinQuanAdmin.Crawler
             var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
-                driverService.HideCommandPromptWindow = true;
+                //driverService.HideCommandPromptWindow = true;
                 var options = new ChromeOptions();
-                options.AddArguments("--headless");
+                //options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
@@ -63,6 +63,8 @@ namespace JinQuanAdmin.Crawler
         {
             _webDriver.Manage().Cookies.DeleteAllCookies();
         }
+
+      
         public bool Login(string username, string pwd)
         {
             try
@@ -71,15 +73,18 @@ namespace JinQuanAdmin.Crawler
 
                 CleanCookie();
                 _webDriver.Navigate().GoToUrl(login_url);
+                Thread.Sleep(2_000);
                 _webDriver.FindElement(By.Id(loing_name_id), 10).SendKeys(username);
                 _webDriver.FindElement(By.Id(loing_pwd_id), 10).SendKeys(pwd);
                 _webDriver.FindElement(By.Id(loing_submit_id), 10).Click();
-                Thread.Sleep(3_000);
+                Thread.Sleep(2_000);
+                closeAllALert();
+
                 if (!_webDriver.Url.EndsWith("AdminIndex.aspx"))
                 {
+
                     return false;
                 }            
-                closeAllALert();
                 _webDriver.Navigate().GoToUrl(back_url);
                 LogHelper.LogAction.Invoke("登录成功");
                 //_webDriver.FindElement(By.XPath(manager_list_xpath), 10).Click();
@@ -88,6 +93,7 @@ namespace JinQuanAdmin.Crawler
             catch (Exception e)
             {
                 LogHelper.LogAction.Invoke("登录失败，" + e.Message);
+
                 return false;
             }
         }

@@ -45,6 +45,9 @@ namespace JinQuanAdmin.Model
 
 
 
+        public string OriginAnchor { get; set; }
+        public List<string> OriginPicUrl { get; set; } = new List<string>();
+
 
         /// <summary>
         /// 图片地址
@@ -93,9 +96,10 @@ namespace JinQuanAdmin.Model
             {
                 sb.AppendLine($"#收录情况#{this.Included}");
             }
-            sb.AppendLine($"#瞄点#{string.Join("|", this.WriteAnchor)}");
+            sb.AppendLine($"#瞄点#{this.OriginAnchor + string.Join("|", this.WriteAnchor)}");
             sb.AppendLine($"#图片链接#");
             this.WritePicUrl.ForEach(s => sb.AppendLine($"@图片开始@{s}@图片结束@"));
+            this.OriginPicUrl.ForEach(s => sb.AppendLine(s));
             sb.AppendLine("");
             return sb.ToString();
         }

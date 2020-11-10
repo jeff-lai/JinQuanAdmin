@@ -177,12 +177,15 @@ namespace JinQuanAdmin.Common
                 if (line.Contains("#瞄点#"))
                 {
                     string anchorStr = line.Replace("#瞄点#", "");
+                    anchor.OriginAnchor = anchorStr + "|";
                     anchor.ReadAnchor = anchorStr.Split('|')?.ToList()?.Select(s => string.IsNullOrEmpty(s) ? "" : $"<p></p><p></p><p>&nbsp&nbsp<a name=\"{s}\"></a></p>")?.ToList();
                     continue;
                 }
                 if (line.Contains("@图片开始@"))
                 {
+                    anchor.OriginPicUrl.Add(line);
                     string newLine = ReplayPic(line);
+
                     anchor.ReadPicUrl.Add(newLine);
                 }
             }

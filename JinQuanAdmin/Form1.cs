@@ -470,72 +470,94 @@ namespace JinQuanAdmin
             string name = FilePath.Insert(index, fileName);
             return name;
         }
+
+
         private void RefreshSetTop(List<Account> accounts)
         {
+
             Task.Run(() =>
-            {
-                using (var crawle = new NewCrawle())
                 {
-                    string filePath = GetNewPath($"-{menuTypesSets.First().GetDescription()}替换");
-                    foreach (var account in accounts)
+                    using (var crawle = new NewCrawle())
                     {
+                        string filePath = GetNewPath($"-已查收录");
+                        foreach (var account in accounts)
+                        {
 
-                        if (!crawle.Login(account.UserName, account.Password))
-                        {
-                            WriteLogger("登录失败,请检查账号或者密码！");
-                            continue;
-                        };
-
-                        int total;
-                        int pageTotal;
-                        var list = crawle.GetArticlesTitles(menuTypesSets.First(), -1, out total, out pageTotal);
-                        if (!list.Any())
-                        {
-                            WriteLogger("没有获取到文章");
-                            return;
-                        }
-                        try
-                        {
-                            using (var baidu = new NewCrawle(proxt_address))
+                            if (!crawle.Login(account.UserName, account.Password))
                             {
-                                foreach (var item in list)
-                                {
-                                    item.IsIncluded = baidu.IsBaiduRecord(item.Title);
-                                    string isIncluded = item.IsIncluded ? "有" : "无";
-                                    WriteLogger($"标题：{item.Title},收录情况:{isIncluded}");
-                                    Thread.Sleep(300);
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            WriteLogger($"百度反扒虫");
-                            return;
-                        }
-                        var topList = list.Where(s => s.IsIncluded).ToList();
-                        string includedMessage = "";
-                        if (topList == null || !topList.Any())
-                        {
-                            includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
-                            account.Included = includedMessage;
-                            WriteLogger(includedMessage);
-                            return;
-                        }
-                        int count = topList.Count;
-                        WriteLogger($"收录文章数:{count},开始刷新置顶");
-                        crawle.RefreshSetTop(topList);
-                        int needPage = (count + 16) / 16;
+                                WriteLogger("登录失败,请检查账号或者密码！");
+                                continue;
+                            };
 
-                        includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
-                        account.Included = includedMessage;
-                        WriteLogger(includedMessage);
-                        WriteTxt(filePath, account);
+                            int total;
+                            int pageTotal;
+                            var list = crawle.GetArticlesTitles(menuTypesSets.First(), -1, out total, out pageTotal);
+                            if (!list.Any())
+                            {
+                                WriteLogger("没有获取到文章");
+                                return;
+                            }
+                            Retry = 0;
+                            BaiduSearch(proxt_address, list);
+                            var topList = list.Where(s => s.IsIncluded).ToList();
+                            string includedMessage = "";
+                            if (topList == null || !topList.Any())
+                            {
+                                includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
+                                account.Included = includedMessage;
+                                WriteLogger(includedMessage);
+                                return;
+                            }
+                            int count = topList.Count;
+                            WriteLogger($"收录文章数:{count},开始刷新置顶");
+                            crawle.RefreshSetTop(topList);
+                            int needPage = (count + 16) / 16;
+
+                            includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
+                            account.Included = includedMessage;
+
+                            WriteLogger(includedMessage);
+                            WriteTxt(filePath, account);
+                        }
+                        WriteLogger($"已导出文件{filePath}");
+                        WriteLogger($"执行结束");
+                        SetControllerEnable(true);
                     }
-                    WriteLogger($"已导出文件{filePath}");
-                    WriteLogger($"执行结束");
-                    SetControllerEnable(true);
+                });
+        }
+        private static int Retry = 0;
+
+        private void BaiduSearch(string proxy, List<ArticleTitle> articles)
+        {
+            using (var baidu = new NewCrawle(proxy))
+            {
+                try
+                {
+                    foreach (var item in articles)
+                    {
+                        item.IsIncluded = baidu.IsBaiduRecord(item.Title);
+                        string isIncluded = item.IsIncluded ? "有" : "无";
+                        WriteLogger($"标题：{item.Title},收录情况:{isIncluded}");
+                        Thread.Sleep(300);
+                    }
+
                 }
-            });
+                catch (Exception e)
+                {
+
+                    WriteLogger($"百度反扒虫，{e.Message}");
+                    Retry++;
+                    if (Retry > 3)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        BaiduSearch(proxy, articles);
+                    }
+
+                }
+            }
         }
 
         private bool isHasFilePath()
@@ -720,13 +742,30 @@ namespace JinQuanAdmin
 
 
         }
+
+        int retry = 0;
+        private bool Login(NewCrawle crawle, string userName, string password)
+        {
+            if (!crawle.Login(userName, userName))
+            {
+                retry++;
+                if (retry < 3)
+                {
+                    Login(crawle, userName, password);
+                }
+                WriteLogger("登录失败");
+                return false;
+            };
+            return true;
+        }
         private void btn_pic_Click(object sender, EventArgs e)
         {
+
             if (!isHasFilePath())
             {
                 return;
             }
-            string filePath = GetNewPath($"-锚点图片");
+            string filePath = GetNewPath($"-已查锚图");
             var accounts = GetAccounts();
             if (accounts == null || !accounts.Any())
             {
@@ -734,56 +773,57 @@ namespace JinQuanAdmin
             }
             SetControllerEnable(false);
             Task.Run(() =>
-            {
-
-                using (var crawle = new NewCrawle())
                 {
-                    try
+
+                    using (var crawle = new NewCrawle())
                     {
-                        foreach (var account in accounts)
+                        try
                         {
-                            if (!crawle.Login(account.UserName, account.Password))
+                            foreach (var account in accounts)
                             {
-                                WriteLogger("登录失败");
-                                continue;
-                            };
-                            WriteLogger("开始获取锚点");
-                            account.WriteAnchor = crawle.GetAnchorList();
-                            WriteLogger("获取锚点结束");
-                            var urls = crawle.GetArticleUrls(MenuType.produceList, -1, account.StartPaged, account.EndPaged);
-                            if (urls == null || !urls.Any())
-                            {
-                                WriteLogger("获取文章路径失败");
-                                continue;
-                            }
-
-                            WriteLogger("开始获取图片");
-                            foreach (var url in urls)
-                            {
-                                WriteLogger($"获取{url}图片");
-                                var pics = crawle.GetProductPic(url);
-                                if (pics.Any())
+                                if (!Login(crawle, account.UserName, account.Password))
                                 {
-                                    account.WritePicUrl.AddRange(pics);
-                                }
-                            }
-                            WriteLogger("获取图片结束");
-               
-                            WriteTxt(filePath, account);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
-                        SetControllerEnable(true);
-                        return;
-                    }   
-                    SetControllerEnable(true);
-                    WriteLogger($"已导出文件{filePath}");
-                    WriteLogger("执行结束");
-                }
 
-            });
+                                    WriteLogger("登录失败");
+                                    continue;
+                                };
+                                WriteLogger("开始获取锚点");
+                                account.WriteAnchor = crawle.GetAnchorList();
+                                WriteLogger("获取锚点结束");
+                                var urls = crawle.GetArticleUrls(MenuType.produceList, -1, account.StartPaged, account.EndPaged);
+                                if (urls == null || !urls.Any())
+                                {
+                                    WriteLogger("获取文章路径失败");
+                                    continue;
+                                }
+
+                                WriteLogger("开始获取图片");
+                                foreach (var url in urls)
+                                {
+                                    WriteLogger($"获取{url}图片");
+                                    var pics = crawle.GetProductPic(url);
+                                    if (pics.Any())
+                                    {
+                                        account.WritePicUrl.AddRange(pics);
+                                    }
+                                }
+                                WriteLogger("获取图片结束");
+
+                                WriteTxt(filePath, account);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
+                            SetControllerEnable(true);
+                            return;
+                        }
+                        SetControllerEnable(true);
+                        WriteLogger($"已导出文件{filePath}");
+                        WriteLogger("执行结束");
+                    }
+
+                });
         }
 
 
