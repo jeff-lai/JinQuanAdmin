@@ -588,7 +588,7 @@ namespace JinQuanAdmin
 
         private void InsertAnchors()
         {
-            Task.Run((Action)(() =>
+            Task.Run(() =>
             {
                 var accounts = GetAccounts();
                 if (accounts == null || !accounts.Any())
@@ -596,38 +596,53 @@ namespace JinQuanAdmin
                     return;
                 }
                 WriteLogger($"读取账号数量{accounts.Count}");
-                using (var crawle = new NewCrawle())
+                try
                 {
-                    foreach (var account in accounts)
+                    using (var crawle = new NewCrawle())
                     {
 
-                        if (!crawle.Login(account.UserName, account.Password))
+                        foreach (var account in accounts)
                         {
-                            WriteLogger("登录失败");
-                            continue;
-                        };
 
-                        var artcles = crawle.GetArticleUrls(MenuType.news_list, -1, account.StartPaged, account.EndPaged);
-                        if (!artcles.Any())
-                        {
-                            WriteLogger("文章加载失败");
-                            continue;
-                        }
-                        WriteLogger($"账号：{account.UserName}，获取文章数:{artcles.Count}");
-                        int index = 0;
+                            if (!crawle.Login(account.UserName, account.Password))
+                            {
+                                WriteLogger("登录失败");
+                                continue;
+                            };
 
-                        foreach (var artcle in artcles)
-                        {
-                            WriteLogger($"地址：{artcle}，开始插入锚点");
-                            crawle.InsertAnchor(artcle, account.GetAnchorContent(index++));
+                            var artcles = crawle.GetArticleUrls(MenuType.news_list, -1, account.StartPaged, account.EndPaged);
+                            if (!artcles.Any())
+                            {
+                                WriteLogger("文章加载失败");
+                                continue;
+                            }
+                            WriteLogger($"账号：{account.UserName}，获取文章数:{artcles.Count}");
+                            int index = 0;
+
+                            foreach (var artcle in artcles)
+                            {
+                                try
+                                {
+                                    crawle.InsertAnchor(artcle, account.GetAnchorContent(index++));
+                                    WriteLogger($"已插入第{index}条,地址：{artcle}");
+                                }
+                                catch (Exception e)
+                                {
+                                    WriteLogger($"第{index}条插入失败,地址：{artcle}，{e.Message},{e.StackTrace}");
+                                    continue;
+                                }
+                            }
+                            WriteLogger("插入锚点结束");
                         }
-                        WriteLogger("插入锚点结束");
                     }
+                    WriteLogger($"执行结束");
+                    SetControllerEnable(true);
                 }
-                WriteLogger($"执行结束");
-                SetControllerEnable(true);
-
-            }));
+                catch (Exception e)
+                {
+                    WriteLogger($"浏览器被意外关闭，请重新启动任务，{e.Message},{e.StackTrace}");
+                }
+            });
         }
 
         private void btn_log_Click(object sender, EventArgs e)
