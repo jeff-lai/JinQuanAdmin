@@ -23,9 +23,9 @@ namespace JinQuanAdmin.Crawler
             var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
-                //driverService.HideCommandPromptWindow = true;
+                driverService.HideCommandPromptWindow = true;
                 var options = new ChromeOptions();
-                //options.AddArguments("--headless");
+                options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
@@ -80,7 +80,7 @@ namespace JinQuanAdmin.Crawler
                 Thread.Sleep(2_000);
                 closeAllALert();
 
-                if (!_webDriver.Url.EndsWith("AdminIndex.aspx"))
+                if (_webDriver.Url.Contains("error"))
                 {
 
                     return false;

@@ -163,8 +163,16 @@ namespace JinQuanAdmin.Common
                     anchor.SetNameAndPassword(arrays[0], arrays[1]);
                     if (arrays.Length > 2)
                     {
-                        anchor.StartPaged = Convert.ToInt32(arrays[2]);
-                        anchor.EndPaged = Convert.ToInt32(arrays[3]);
+                        try
+                        {
+                            anchor.StartPaged = Convert.ToInt32(arrays[2]);
+                            anchor.EndPaged = Convert.ToInt32(arrays[3]);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception($"{anchor.UserName}账号格式不正确，请调整账号页数");
+                        }
+
                     }
                     continue;
                 }
