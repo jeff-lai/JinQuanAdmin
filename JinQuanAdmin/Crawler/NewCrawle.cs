@@ -30,7 +30,7 @@ namespace JinQuanAdmin.Crawler
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
                 string exePath = Properties.Settings.Default.ExePath;
-       
+
                 if (!string.IsNullOrEmpty(exePath))
                 {
                     if (!File.Exists(exePath))
@@ -64,7 +64,7 @@ namespace JinQuanAdmin.Crawler
             _webDriver.Manage().Cookies.DeleteAllCookies();
         }
 
-      
+
         public bool Login(string username, string pwd)
         {
             try
@@ -77,14 +77,14 @@ namespace JinQuanAdmin.Crawler
                 _webDriver.FindElement(By.Id(loing_name_id), 10).SendKeys(username);
                 _webDriver.FindElement(By.Id(loing_pwd_id), 10).SendKeys(pwd);
                 _webDriver.FindElement(By.Id(loing_submit_id), 10).Click();
-                Thread.Sleep(2_000);
+                Thread.Sleep(3_000);
                 closeAllALert();
 
                 if (_webDriver.Url.Contains("error"))
                 {
 
                     return false;
-                }            
+                }
                 _webDriver.Navigate().GoToUrl(back_url);
                 LogHelper.LogAction.Invoke("登录成功");
                 //_webDriver.FindElement(By.XPath(manager_list_xpath), 10).Click();

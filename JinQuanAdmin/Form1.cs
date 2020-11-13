@@ -511,7 +511,7 @@ namespace JinQuanAdmin
                             int count = topList.Count;
                             WriteLogger($"收录文章数:{count},开始刷新置顶");
                             crawle.RefreshSetTop(topList);
-                            int needPage = (count + 16) / 16;
+                            int needPage = ((count + 16 - 1) / 16) + 1;
 
                             includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
                             account.Included = includedMessage;
@@ -761,7 +761,7 @@ namespace JinQuanAdmin
         int retry = 0;
         private bool Login(NewCrawle crawle, string userName, string password)
         {
-            if (!crawle.Login(userName, userName))
+            if (!crawle.Login(userName, password))
             {
                 retry++;
                 if (retry < 3)
