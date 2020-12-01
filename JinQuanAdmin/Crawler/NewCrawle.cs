@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -239,7 +240,8 @@ namespace JinQuanAdmin.Crawler
         /// </summary>
         private string article_rows = "//table//td//tr[position()>1]";
         private string article_row_ckeckbox = "//input[@type='checkbox']";
-        private string article_row_title = "//td[2]/span";
+        private string article_row_title = "//td[3]/span";
+        private string article_row_old_title = "//td[2]/span";
         /// <summary>
         /// ArticleTitle
         /// </summary>
@@ -257,7 +259,17 @@ namespace JinQuanAdmin.Crawler
                 if (NavigateList(menuType))
                 {
                     var firstValueList = _webDriver.FindElements(By.XPath(article_rows + article_row_ckeckbox), 10);
-                    var firstTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_title), 10);
+
+                    ReadOnlyCollection<IWebElement> firstTitleList;
+                    if (menuType == MenuType.produceList)
+                    {
+                        firstTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_title), 10);
+                    }
+                    else
+                    {
+                        firstTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_old_title), 10);
+                    }
+
                     if (count < 0)
                     {
                         count = Convert.ToInt32(_webDriver.FindElement(By.XPath(pagecount_xpath), 10).Text);
