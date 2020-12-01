@@ -524,12 +524,21 @@ namespace JinQuanAdmin.Crawler
 
         private string row_ck_name = "cbproduce";
         private string bt_top_btreftch = "btreftch";
-        public void RefreshSetTop(List<ArticleTitle> list)
+        public void RefreshSetTop(List<ArticleTitle> list, MenuType type)
         {
             int needPage = (list.Count + pageSize - 1) / pageSize;
             _webDriver.Navigate().GoToUrl(string.Concat(MeunUrl, "?p=", 1));
             Thread.Sleep(2_000);
-            var button = _webDriver.FindElement(By.Id("btReftch"), 10);
+            IWebElement button;
+            if (type == MenuType.produceList)
+            {
+                button = _webDriver.FindElement(By.Id("btReftch"), 10);
+            }
+            else
+            {
+                button = _webDriver.FindElement(By.Id(bt_top_btreftch), 10);
+            }
+
             var jsDriver = (IJavaScriptExecutor)_webDriver;
             for (int i = 1; i <= needPage; i++)
             {
