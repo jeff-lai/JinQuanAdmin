@@ -477,6 +477,10 @@ namespace JinQuanAdmin
 
             Task.Run(() =>
                 {
+                    try
+                    {
+
+
                     using (var crawle = new NewCrawle())
                     {
                         string filePath = GetNewPath($"-已查收录");
@@ -520,6 +524,16 @@ namespace JinQuanAdmin
                             WriteTxt(filePath, account);
                         }
                         WriteLogger($"已导出文件{filePath}");
+                        WriteLogger($"执行结束");
+                        SetControllerEnable(true);
+
+                    }
+
+                    }
+                    catch (Exception e)
+                    {
+
+                        WriteLogger($"执行异常{e.Message},{e.StackTrace}");
                         WriteLogger($"执行结束");
                         SetControllerEnable(true);
                     }
