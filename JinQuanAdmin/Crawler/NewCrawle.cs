@@ -254,21 +254,16 @@ namespace JinQuanAdmin.Crawler
             LogHelper.LogAction.Invoke($"正在采集{menuType.GetDescription()}文章列表");
             List<ArticleTitle> list = new List<ArticleTitle>();
             pageTotal = 0;
+            string title_position = menuType == MenuType.produceList ? article_row_title : article_row_old_title;
             try
             {
                 if (NavigateList(menuType))
                 {
                     var firstValueList = _webDriver.FindElements(By.XPath(article_rows + article_row_ckeckbox), 10);
 
-                    ReadOnlyCollection<IWebElement> firstTitleList;
-                    if (menuType == MenuType.produceList)
-                    {
-                        firstTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_title), 10);
-                    }
-                    else
-                    {
-                        firstTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_old_title), 10);
-                    }
+
+                    var firstTitleList = _webDriver.FindElements(By.XPath(article_rows + title_position), 10);
+
 
                     if (count < 0)
                     {
@@ -299,7 +294,7 @@ namespace JinQuanAdmin.Crawler
                             _webDriver.Navigate().GoToUrl(string.Concat(MeunUrl, "?p=", i));
                             LogHelper.LogAction.Invoke($"{menuType.GetDescription()}开始采集第 {i} 页文章");
                             var tempValueList = _webDriver.FindElements(By.XPath(article_rows + article_row_ckeckbox), 10);
-                            var tempTitleList = _webDriver.FindElements(By.XPath(article_rows + article_row_title), 10);
+                            var tempTitleList = _webDriver.FindElements(By.XPath(article_rows + title_position), 10);
                             if (tempValueList != null)
                             {
                                 for (int j = 0; j < tempValueList.Count; j++)
