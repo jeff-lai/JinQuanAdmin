@@ -529,6 +529,7 @@ namespace JinQuanAdmin.Crawler
             int needPage = (list.Count + pageSize - 1) / pageSize;
             _webDriver.Navigate().GoToUrl(string.Concat(MeunUrl, "?p=", 1));
             Thread.Sleep(2_000);
+            var button = _webDriver.FindElement(By.Id("btReftch"), 10);
             var jsDriver = (IJavaScriptExecutor)_webDriver;
             for (int i = 1; i <= needPage; i++)
             {
@@ -538,7 +539,7 @@ namespace JinQuanAdmin.Crawler
                     jsDriver.ExecuteScript($"document.getElementsByName('{row_ck_name}')[{j}].value = '{setList[j].Value}';");
                     jsDriver.ExecuteScript($"document.getElementsByName('{row_ck_name}')[{j}].checked = true;");
                 }
-                _webDriver.FindElement(By.Id(bt_top_btreftch), 10).Click();
+                button.Click();
                 Thread.Sleep(2_000);
             }
 
