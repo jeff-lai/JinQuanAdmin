@@ -491,18 +491,27 @@ namespace JinQuanAdmin.Crawler
         /// </summary>
         /// <param name="title"></param>
         /// <returns></returns>
-        public bool IsBaiduRecord(string title)
+        public bool IsBaiduRecord(string title, out string msg)
         {
+
+            msg = "否";
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
             _webDriver.Navigate().GoToUrl(baiduUrl);
+
             Thread.Sleep(200);
+            if (_webDriver.PageSource.Length < 100)
+            {
+                msg = "查询失败，百度无响应";
+                return false;
+            }
             if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
             {
                 var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match)).Text;
                 if (fisrtTxt.StartsWith(newTitle))
                 {
+                    msg = "是";
                     return true;
                 }
             }
@@ -511,6 +520,7 @@ namespace JinQuanAdmin.Crawler
             {
                 if (item.Text.StartsWith(newTitle))
                 {
+                    msg = "是";
                     return true;
                 }
             }

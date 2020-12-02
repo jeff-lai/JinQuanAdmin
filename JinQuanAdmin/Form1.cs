@@ -549,8 +549,9 @@ namespace JinQuanAdmin
                 {
                     foreach (var item in articles)
                     {
-                        item.IsIncluded = baidu.IsBaiduRecord(item.Title);
-                        string isIncluded = item.IsIncluded ? "有" : "无";
+                        string isIncluded ="无";
+                        item.IsIncluded = baidu.IsBaiduRecord(item.Title,out isIncluded);
+                       
                         WriteLogger($"标题：{item.Title},收录情况:{isIncluded}");
                         Thread.Sleep(300);
                     }
