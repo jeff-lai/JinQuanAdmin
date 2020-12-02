@@ -524,19 +524,20 @@ namespace JinQuanAdmin.Crawler
             int needPage = (list.Count + pageSize - 1) / pageSize;
             _webDriver.Navigate().GoToUrl(string.Concat(MeunUrl, "?p=", 1));
             Thread.Sleep(2_000);
-            IWebElement button;
-            if (type == MenuType.produceList)
-            {
-                button = _webDriver.FindElement(By.Id("btReftch"), 10);
-            }
-            else
-            {
-                button = _webDriver.FindElement(By.Id(bt_top_btreftch), 10);
-            }
+  
 
             var jsDriver = (IJavaScriptExecutor)_webDriver;
             for (int i = 1; i <= needPage; i++)
             {
+                IWebElement button;
+                if (type == MenuType.produceList)
+                {
+                    button = _webDriver.FindElement(By.Id("btReftch"), 10);
+                }
+                else
+                {
+                    button = _webDriver.FindElement(By.Id(bt_top_btreftch), 10);
+                }
                 var setList = list.Skip((i - 1) * 16).Take(16).ToList();
                 for (int j = 0; j < setList.Count; j++)
                 {
