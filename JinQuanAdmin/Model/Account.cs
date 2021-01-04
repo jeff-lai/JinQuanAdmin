@@ -94,7 +94,7 @@ namespace JinQuanAdmin.Model
             }
             if (!string.IsNullOrEmpty(Included))
             {
-                sb.AppendLine($"#收录情况#{this.Included}");
+                sb.AppendLine($"#收录情况#{this.Included}");                
             }
             sb.AppendLine($"#瞄点#{this.OriginAnchor + string.Join("|", this.WriteAnchor)}");
             sb.AppendLine($"#图片链接#");

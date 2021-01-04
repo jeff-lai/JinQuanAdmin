@@ -4,7 +4,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -24,9 +23,9 @@ namespace JinQuanAdmin.Crawler
             var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
-                //driverService.HideCommandPromptWindow = true;
+                driverService.HideCommandPromptWindow = true;
                 var options = new ChromeOptions();
-                //options.AddArguments("--headless");
+                options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
@@ -44,6 +43,7 @@ namespace JinQuanAdmin.Crawler
                 {
                     //var proxyIpAddress = "tps111.kdlapi.com:15818"; //_proxyProvider.GetProxyIpAddress();
                     options.AddArgument("--proxy-server=http://" + proxy);
+
                 }
                 _webDriver = new ChromeDriver(driverService, options);
             }
@@ -493,8 +493,6 @@ namespace JinQuanAdmin.Crawler
         /// <returns></returns>
         public BaiduResponseResult IsBaiduRecord(string title)
         {
-
-            BaiduResponseResult result = BaiduResponseResult.None;
             if (title.Length > 20)
             {
                 title = title.Substring(0, 20);
@@ -507,7 +505,11 @@ namespace JinQuanAdmin.Crawler
             Thread.Sleep(200);
             if (_webDriver.PageSource.Length < 100)
             {
-                result = BaiduResponseResult.ProxyException;
+                return BaiduResponseResult.ProxyException;
+            }
+            if (!_webDriver.IsElementExist(By.Id("container")))
+            {
+                return BaiduResponseResult.IpBlackIntercept;
             }
             if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
             {
@@ -515,7 +517,7 @@ namespace JinQuanAdmin.Crawler
                 if (fisrtTxt.StartsWith(newTitle))
                 {
 
-                    result = BaiduResponseResult.Included;
+                    return BaiduResponseResult.Included;
                 }
             }
             var titles = _webDriver.FindElements(By.XPath(baidu_rows));
@@ -523,10 +525,10 @@ namespace JinQuanAdmin.Crawler
             {
                 if (item.Text.StartsWith(newTitle))
                 {
-                    result = BaiduResponseResult.Included;
+                    return BaiduResponseResult.Included;
                 }
             }
-            return result;
+            return BaiduResponseResult.None;
         }
 
         private string row_ck_name = "cbproduce";

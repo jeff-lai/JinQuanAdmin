@@ -458,7 +458,7 @@ namespace JinQuanAdmin
             {
                 return;
             }
-            proxt_address = txt_ptoxy.Text.Trim();
+
             SetControllerEnable(false);
             RefreshSetTop(accounts);
         }
@@ -480,8 +480,6 @@ namespace JinQuanAdmin
                 {
                     try
                     {
-
-
                         using (var crawle = new NewCrawle())
                         {
                             string filePath = GetNewPath($"-已查收录");
@@ -552,7 +550,7 @@ namespace JinQuanAdmin
                     foreach (var item in articles)
                     {
                         var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
-                            .Retry(3).Execute(() =>
+                            .Retry(5).Execute(() =>
                             {
                                 return baidu.IsBaiduRecord(item.Title);
                             });
@@ -567,7 +565,7 @@ namespace JinQuanAdmin
                 catch (Exception e)
                 {
 
-                    WriteLogger($"百度反扒虫，{e.Message}");
+                    WriteLogger($"查询异常请将异常发送给管理员，{e.Message}");
                     Retry++;
                     if (Retry > 3)
                     {
