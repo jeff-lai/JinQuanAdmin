@@ -24,9 +24,9 @@ namespace JinQuanAdmin.Crawler
             var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
-                driverService.HideCommandPromptWindow = true;
+                //driverService.HideCommandPromptWindow = true;
                 var options = new ChromeOptions();
-                options.AddArguments("--headless");
+                //options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
@@ -491,10 +491,14 @@ namespace JinQuanAdmin.Crawler
         /// </summary>
         /// <param name="title"></param>
         /// <returns></returns>
-        public bool IsBaiduRecord(string title, out string msg)
+        public BaiduResponseResult IsBaiduRecord(string title)
         {
 
-            msg = "否";
+            BaiduResponseResult result = BaiduResponseResult.None;
+            if (title.Length > 20)
+            {
+                title = title.Substring(0, 20);
+            }
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
@@ -503,16 +507,15 @@ namespace JinQuanAdmin.Crawler
             Thread.Sleep(200);
             if (_webDriver.PageSource.Length < 100)
             {
-                msg = "查询失败，百度无响应";
-                return false;
+                result = BaiduResponseResult.ProxyException;
             }
             if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
             {
                 var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match)).Text;
                 if (fisrtTxt.StartsWith(newTitle))
                 {
-                    msg = "是";
-                    return true;
+
+                    result = BaiduResponseResult.Included;
                 }
             }
             var titles = _webDriver.FindElements(By.XPath(baidu_rows));
@@ -520,11 +523,10 @@ namespace JinQuanAdmin.Crawler
             {
                 if (item.Text.StartsWith(newTitle))
                 {
-                    msg = "是";
-                    return true;
+                    result = BaiduResponseResult.Included;
                 }
             }
-            return false;
+            return result;
         }
 
         private string row_ck_name = "cbproduce";
@@ -534,7 +536,7 @@ namespace JinQuanAdmin.Crawler
             int needPage = (list.Count + pageSize - 1) / pageSize;
             _webDriver.Navigate().GoToUrl(string.Concat(MeunUrl, "?p=", 1));
             Thread.Sleep(2_000);
-  
+
 
             var jsDriver = (IJavaScriptExecutor)_webDriver;
             for (int i = 1; i <= needPage; i++)

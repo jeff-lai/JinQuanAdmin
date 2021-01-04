@@ -1,6 +1,7 @@
 ﻿using JinQuanAdmin.Common;
 using JinQuanAdmin.Crawler;
 using JinQuanAdmin.Model;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -481,53 +482,53 @@ namespace JinQuanAdmin
                     {
 
 
-                    using (var crawle = new NewCrawle())
-                    {
-                        string filePath = GetNewPath($"-已查收录");
-                        foreach (var account in accounts)
+                        using (var crawle = new NewCrawle())
                         {
+                            string filePath = GetNewPath($"-已查收录");
+                            foreach (var account in accounts)
+                            {
 
-                            if (!crawle.Login(account.UserName, account.Password))
-                            {
-                                WriteLogger("登录失败,请检查账号或者密码！");
-                                continue;
-                            };
+                                if (!crawle.Login(account.UserName, account.Password))
+                                {
+                                    WriteLogger("登录失败,请检查账号或者密码！");
+                                    continue;
+                                };
 
-                            int total;
-                            int pageTotal;
-                            var list = crawle.GetArticlesTitles(menuTypesSets.First(), -1, out total, out pageTotal);
-                            if (!list.Any())
-                            {
-                                WriteLogger("没有获取到文章");
-                                return;
-                            }
-                            Retry = 0;
-                            BaiduSearch(proxt_address, list);
-                            var topList = list.Where(s => s.IsIncluded).ToList();
-                            string includedMessage = "";
-                            if (topList == null || !topList.Any())
-                            {
-                                includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
+                                int total;
+                                int pageTotal;
+                                var list = crawle.GetArticlesTitles(menuTypesSets.First(), -1, out total, out pageTotal);
+                                if (!list.Any())
+                                {
+                                    WriteLogger("没有获取到文章");
+                                    return;
+                                }
+                                Retry = 0;
+                                BaiduSearch(proxt_address, list);
+                                var topList = list.Where(s => s.IsIncluded).ToList();
+                                string includedMessage = "";
+                                if (topList == null || !topList.Any())
+                                {
+                                    includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
+                                    account.Included = includedMessage;
+                                    WriteLogger(includedMessage);
+                                    return;
+                                }
+                                int count = topList.Count;
+                                WriteLogger($"收录文章数:{count},开始刷新置顶");
+                                crawle.RefreshSetTop(topList, menuTypesSets.First());
+                                int needPage = ((count + 16 - 1) / 16) + 1;
+
+                                includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
                                 account.Included = includedMessage;
+
                                 WriteLogger(includedMessage);
-                                return;
+                                WriteTxt(filePath, account);
                             }
-                            int count = topList.Count;
-                            WriteLogger($"收录文章数:{count},开始刷新置顶");
-                            crawle.RefreshSetTop(topList,menuTypesSets.First());
-                            int needPage = ((count + 16 - 1) / 16) + 1;
+                            WriteLogger($"已导出文件{filePath}");
+                            WriteLogger($"执行结束");
+                            SetControllerEnable(true);
 
-                            includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
-                            account.Included = includedMessage;
-
-                            WriteLogger(includedMessage);
-                            WriteTxt(filePath, account);
                         }
-                        WriteLogger($"已导出文件{filePath}");
-                        WriteLogger($"执行结束");
-                        SetControllerEnable(true);
-
-                    }
 
                     }
                     catch (Exception e)
@@ -541,6 +542,7 @@ namespace JinQuanAdmin
         }
         private static int Retry = 0;
 
+
         private void BaiduSearch(string proxy, List<ArticleTitle> articles)
         {
             using (var baidu = new NewCrawle(proxy))
@@ -549,10 +551,15 @@ namespace JinQuanAdmin
                 {
                     foreach (var item in articles)
                     {
-                        string isIncluded ="无";
-                        item.IsIncluded = baidu.IsBaiduRecord(item.Title,out isIncluded);
-                       
-                        WriteLogger($"标题：{item.Title},收录情况:{isIncluded}");
+                        var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
+                            .Retry(3).Execute(() =>
+                            {
+                                return baidu.IsBaiduRecord(item.Title);
+                            });
+                        //var result = baidu.IsBaiduRecord(item.Title);
+                        item.IsIncluded = result == BaiduResponseResult.Included;
+
+                        WriteLogger($"标题：{item.Title},收录情况:{result.GetDescription()}");
                         Thread.Sleep(300);
                     }
 
@@ -773,13 +780,13 @@ namespace JinQuanAdmin
 
         }
 
-        int retry = 0;
+        int LoginRetryNum = 0;
         private bool Login(NewCrawle crawle, string userName, string password)
         {
             if (!crawle.Login(userName, password))
             {
-                retry++;
-                if (retry < 3)
+                LoginRetryNum++;
+                if (LoginRetryNum < 3)
                 {
                     Login(crawle, userName, password);
                 }
@@ -811,6 +818,7 @@ namespace JinQuanAdmin
                         {
                             foreach (var account in accounts)
                             {
+                                LoginRetryNum = 0;
                                 if (!Login(crawle, account.UserName, account.Password))
                                 {
 
