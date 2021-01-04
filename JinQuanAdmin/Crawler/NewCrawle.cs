@@ -501,16 +501,16 @@ namespace JinQuanAdmin.Crawler
         /// <returns></returns>
         public BaiduResponseResult IsBaiduRecord(string title)
         {
-            if (title.Length > 20)
+            if (title.Length > 25)
             {
-                title = title.Substring(0, 20);
+                title = title.Substring(0, 25);
             }
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
             _webDriver.Navigate().GoToUrl(baiduUrl);
 
-            Thread.Sleep(200);
+            Thread.Sleep(1000);
             if (_webDriver.PageSource.Length < 100)
             {
                 return BaiduResponseResult.ProxyException;
@@ -676,6 +676,7 @@ namespace JinQuanAdmin.Crawler
         private string link_title = "//form[@id='Form1']//input[@name='txtTitle']";
         private string link_url= "//form[@id='Form1']//input[@name='txtUrl']";
         private string link_submit= "//form[@id='Form1']//input[@type='submit']";
+        private string link_max_num = "/html[1]/body[1]/div[3]/div[1]/div[2]/div[4]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]//tr[last()]/td[1]";
 
         /// <summary>
         /// 添加友情链接
@@ -695,6 +696,12 @@ namespace JinQuanAdmin.Crawler
             var jsDriver = (IJavaScriptExecutor)_webDriver;
             foreach (var item in linkModels)
             {
+                int num = Convert.ToInt32(_webDriver.FindElement(By.XPath(link_max_num)).Text);
+                if (num == 10)
+                {
+                    LogHelper.LogAction.Invoke($"添加失败，友情链接已上限10个,不能添加");
+                    return;
+                }
                 LogHelper.LogAction.Invoke($"添加链接{item.Url}");
                 jsDriver.ExecuteScript($"showDiv();");
                 _webDriver.FindElement(By.XPath(link_title)).SendKeys(item.Title);

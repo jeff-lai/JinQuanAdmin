@@ -18,9 +18,6 @@ namespace JinQuanAdmin.Model
         /// </summary>
         public string Value { get; set; }
 
-        /// <summary>
-        /// 是否包含
-        /// </summary>
-        public bool IsIncluded { get; set; }
+        public BaiduResponseResult Result { get; set; }
     }
 }

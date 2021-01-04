@@ -237,7 +237,7 @@ namespace JinQuanAdmin.Common
                 if (line.Contains("#是否禁止复制#"))
                 {
                     string isCopyStr = line.Replace("#是否禁止复制#", "");
-                    anchor.IsCopy = isCopyStr.Trim().Equals("是");
+                    anchor.IsCopy = !isCopyStr.Trim().Equals("是");
                     continue;
                 }
                 if (line.Contains("#是否手机网站#"))

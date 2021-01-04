@@ -742,11 +742,11 @@ namespace JinQuanAdmin
                             }
                             Retry = 0;
                             BaiduSearch(proxt_address, list);
-                            var topList = list.Where(s => s.IsIncluded).ToList();
+                            var topList = list.Where(s => s.Result == BaiduResponseResult.Included).ToList();
                             string includedMessage = "";
                             if (topList == null || !topList.Any())
                             {
-                                includedMessage = $"栏目：{_MenuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
+                                includedMessage = $"栏目：{_MenuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},异常查询{list.Where(s => (int)s.Result > 1)},未收录页数第：{1}--{pageTotal}";
                                 account.Included = includedMessage;
                                 WriteLogger(includedMessage);
                                 return;
@@ -794,9 +794,8 @@ namespace JinQuanAdmin
                             {
                                 return baidu.IsBaiduRecord(item.Title);
                             });
-                        //var result = baidu.IsBaiduRecord(item.Title);
-                        item.IsIncluded = result == BaiduResponseResult.Included;
-
+                        //var result = baidu.IsBaiduRecord(item.Title);                        
+                        item.Result = result;
                         WriteLogger($"标题：{item.Title},收录情况:{result.GetDescription()}");
                         Thread.Sleep(300);
                     }
@@ -1008,7 +1007,7 @@ namespace JinQuanAdmin
                                 continue;
                             };
                             WriteLogger($"{account?.Company}功能设置");
-                            crawle.ChangeFunctionSetting(account.IsCopy,account.IsApp);
+                            crawle.ChangeFunctionSetting(account.IsCopy, account.IsApp);
                             WriteLogger($"{account?.Company}功能设置完成");
                         }
                         SetControllerEnable(true);
