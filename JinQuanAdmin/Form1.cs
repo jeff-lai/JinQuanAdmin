@@ -26,11 +26,47 @@ namespace JinQuanAdmin
 
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref System.UInt32 pcchCookieData, int dwFlags, IntPtr lpReserved);
+
+
+        #region 公共属性
+
+        /// <summary>
+        /// 菜单集合
+        /// </summary>
+        HashSet<MenuType> _MenuTypesSets = new HashSet<MenuType>();
+        /// <summary>
+        /// 用户名
+        /// </summary>
+        private string UserName { get; set; }
+        /// <summary>
+        /// 密码
+        /// </summary>
+        private string Password { get; set; }
+        /// <summary>
+        /// 文章列表
+        /// </summary>
+        private List<Article> Articles { get; set; }
+
+        /// <summary>
+        /// 是否忽略标题
+        /// </summary>
+        public static bool IsIgnoreTitle;
+
+
+        /// <summary>
+        /// 文件路径
+        /// </summary>
+        private string FilePath = "";
+        #endregion
+
         public Form1()
         {
             InitializeComponent();
 
         }
+
+        #region Load Events
+
 
         /// <summary>
         /// 加载
@@ -52,7 +88,11 @@ namespace JinQuanAdmin
             }
         }
 
-        HashSet<MenuType> menuTypesSets = new HashSet<MenuType>();
+        /// <summary>
+        /// 菜单选择事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Ck_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox ck = sender as CheckBox;
@@ -60,132 +100,83 @@ namespace JinQuanAdmin
             if (ck.Checked)
             {
                 WriteLogger("选择栏目：" + ck.Text);
-                menuTypesSets.Add(type);
+                _MenuTypesSets.Add(type);
 
             }
             else
             {
-                menuTypesSets.Remove(type);
+                _MenuTypesSets.Remove(type);
                 WriteLogger("取消选择栏目：" + ck.Text);
             }
         }
 
-        private void LoadDic()
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (dgv_replace.RowCount > 0)
+
+        }
+
+        /// <summary>
+        /// 浏览器设置事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_setting_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Title = "请选择谷歌浏览器地址";
+            dialog.Filter = "文本文件(*.exe)|*.exe";
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-
-                for (int i = 0; i < dgv_replace.RowCount; i++)
+                string file = dialog.FileName;
+                Properties.Settings.Default.ExePath = file;
+                Properties.Settings.Default.Save();
+                WriteLogger($"执行路径已保存：{file}");
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Properties.Settings.Default.ExePath))
                 {
-                    if (dgv_replace.Rows[i].Cells[0].Value != null)
+                    if (MessageBox.Show("是否要清除浏览器执行路径？", "确认删除", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        string key = dgv_replace.Rows[i].Cells[0].Value.ToString();
-                        if (!ReplaceDic.ContainsKey(key))
-                        {
-                            ReplaceDic.Add(key.Trim(), dgv_replace.Rows[i].Cells[1]?.Value?.ToString() ?? "");
-                        }
-
+                        Properties.Settings.Default.ExePath = "";
+                        Properties.Settings.Default.Save();
                     }
                 }
-
             }
         }
 
-        #region WebWrowser  操作
-
-
-
 
         /// <summary>
-        /// 延时发布
+        /// 日志导出
         /// </summary>
-        private void DelayPost(int m = 0)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_log_Click(object sender, EventArgs e)
         {
-            if (m == 0)
+            SaveFileDialog saveFile = new SaveFileDialog();
+            saveFile.Title = "请选择保存文件路径";
+            saveFile.Filter = "文本文件|*.txt";
+            saveFile.OverwritePrompt = true;  //是否覆盖当前文件
+            saveFile.RestoreDirectory = true;  //还原目录
+            //saveFile.FileName = "替换日志" + DateTime.Now.ToString("yyyyMMddHH:mm:ss");
+            if (saveFile.ShowDialog() == DialogResult.OK)
             {
-                Random random = new Random();
-
-                m = random.Next(10, 21);
-                WriteLogger($"等待发布中，{m}秒");
+                string filepath = saveFile.FileName;
+                WriteTxt(filepath);
+                MessageBox.Show("导出成功", "消息");
             }
-            DateTime current = DateTime.Now;
-            while (current.AddMilliseconds(m * 1000) > DateTime.Now)
+            else
             {
-                Application.DoEvents();
+                return;
             }
-            return;
         }
 
         #endregion
 
-        private string UserName { get; set; }
-        private string Password { get; set; }
-        private List<Article> Articles { get; set; }
+        #region 公共方法
 
-        #region 控件事件
 
-        /// <summary>
-        /// 自动发布
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_save_Click(object sender, EventArgs e)
-        {
-            if (!ReadFileAutoPostAndReplay())
-            {
-                return;
-            }
-            IsIgnoreTitle = cb_removeTitle.Checked;
-            if (!CheckParamter())
-            {
-                return;
-            }
-            else
-            {
-                SetControllerEnable(false);
-            }
-            AutoPost();
-        }
-        public static bool IsIgnoreTitle;
-        private void ReplaceArticles()
-        {
-            if (ReplaceDic.Count > 0)
-            {
-                foreach (var item in Articles)
-                {
-                    foreach (var dic in ReplaceDic)
-                    {
-                        item.Content = item.Content.Replace(dic.Key, dic.Value);
-                    }
-                }
-            }
-        }
-
-        private bool ReadFileAutoPostAndReplay()
-        {
-            if (string.IsNullOrEmpty(FilePath))
-            {
-                MessageBox.Show("未找到文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            var txtHelper = new TxtHelper();
-            Articles = txtHelper.GetArticles(FilePath);
-            UserName = txtHelper.UserName;
-            Password = txtHelper.Password;
-
-            WriteLogger($"加载文件数量：{Articles.Count}");
-
-            WriteLogger($"登录账号：{UserName}");
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password))
-            {
-
-                MessageBox.Show("请检查文件未找到账号信息", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
-        }
-
-        string FilePath = "";
         /// <summary>
         /// 打开文件
         /// </summary>
@@ -229,17 +220,13 @@ namespace JinQuanAdmin
                 return false;
             }
 
-            if (menuTypesSets.Count != 1)
+            if (_MenuTypesSets.Count != 1)
             {
                 MessageBox.Show("请选择一个栏目,不支持多选", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             return true;
         }
-
-        #endregion
-
-        #region 控件委托修改
 
         /// <summary>
         /// 写日志
@@ -262,6 +249,11 @@ namespace JinQuanAdmin
             }
 
         }
+
+        /// <summary>
+        /// 设置控制器是否隐藏
+        /// </summary>
+        /// <param name="enable"></param>
         private void SetControllerEnable(bool enable)
         {
             if (this.btn_file.InvokeRequired)
@@ -282,9 +274,177 @@ namespace JinQuanAdmin
 
         }
 
+        /// <summary>
+        /// 获取新路径
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        private string GetNewPath(string fileName)
+        {
+            int index = FilePath.LastIndexOf(".");
+
+            string name = FilePath.Insert(index, fileName);
+            return name;
+        }
+
+        /// <summary>
+        /// 是否有文件地址
+        /// </summary>
+        /// <returns></returns>
+        private bool isHasFilePath()
+        {
+            if (string.IsNullOrEmpty(FilePath))
+            {
+                MessageBox.Show("请选择文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 写文件
+        /// </summary>
+        /// <param name="path"></param>
+        public void WriteTxt(string path)
+        {
+            FileStream fs = new FileStream(path, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            //开始写入
+            sw.Write(txt_log.Text);
+            //清空缓冲区
+            sw.Flush();
+            //关闭流
+            sw.Close();
+            fs.Close();
+        }
+
+        /// <summary>
+        /// 写文件
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="accounts"></param>
+        public void WriteTxt(string path, List<Account> accounts)
+        {
+            FileStream fs = new FileStream(path, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            accounts.ForEach(s => sw.Write(s));
+            //清空缓冲区
+            sw.Flush();
+            //关闭流
+            sw.Close();
+            fs.Close();
+        }
+
+        /// <summary>
+        /// 写文件
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="account"></param>
+        public void WriteTxt(string path, Account account)
+        {
+            var bytes = System.Text.Encoding.Default.GetBytes(account.ToString());
+            using (var stream = new FileStream(path, FileMode.Append, FileAccess.Write))
+            {
+                stream.Write(bytes, 0, bytes.Length);
+            }
+
+        }
+
+        int LoginRetryNum = 0;
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="crawle"></param>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        private bool Login(NewCrawle crawle, string userName, string password)
+        {
+            if (!crawle.Login(userName, password))
+            {
+                LoginRetryNum++;
+                if (LoginRetryNum < 3)
+                {
+                    Login(crawle, userName, password);
+                }
+                WriteLogger("登录失败");
+                return false;
+            };
+            return true;
+        }
+
+        /// <summary>
+        /// 获取账号
+        /// </summary>
+        /// <returns></returns>
+        private List<Account> GetAccounts()
+        {
+            try
+            {
+
+                WriteLogger("开始加载文件中账号");
+                var list = TxtHelper.GetAccounts(FilePath);
+                if (!list.Any())
+                {
+                    WriteLogger("文件读取到账号请检查文件");
+                }
+                WriteLogger($"账号加载结束,加载账号数{list.Count}");
+                return list;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("文件格式不正确", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+
+        private List<T> GetAccounts<T>(Func<List<T>> func)
+        {
+            try
+            {
+
+                WriteLogger("开始加载文件中账号");
+                var list = func();
+                if (!list.Any())
+                {
+                    WriteLogger("文件读取到账号请检查文件");
+                }
+                WriteLogger($"账号加载结束,加载账号数{list.Count}");
+                return list;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("文件格式不正确", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
         #endregion
 
-        #region 执行方法
+        #region 主方法
+
+        #region 1. 自动发布
+        /// <summary>
+        /// 自动发布
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_save_Click(object sender, EventArgs e)
+        {
+            if (!ReadFileAutoPostAndReplay())
+            {
+                return;
+            }
+            IsIgnoreTitle = cb_removeTitle.Checked;
+            if (!CheckParamter())
+            {
+                return;
+            }
+            else
+            {
+                SetControllerEnable(false);
+            }
+            AutoPost();
+        }
 
         /// <summary>
         /// 自动发布
@@ -304,7 +464,7 @@ namespace JinQuanAdmin
                             return;
                         }
 
-                        var urlList = crawler.GetArticleUrls(menuTypesSets.First(), Articles.Count);
+                        var urlList = crawler.GetArticleUrls(_MenuTypesSets.First(), Articles.Count);
                         if (!urlList.Any())
                         {
                             WriteLogger("文章加载失败");
@@ -315,7 +475,7 @@ namespace JinQuanAdmin
                         {
                             if (i < urlList.Count)
                             {
-                                crawler.SubmitArticle(menuTypesSets.First(), urlList[i], Articles[i]);
+                                crawler.SubmitArticle(_MenuTypesSets.First(), urlList[i], Articles[i]);
                             }
                             else
                             {
@@ -340,36 +500,7 @@ namespace JinQuanAdmin
 
         #endregion
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-
-        }
-
-        private void btn_setting_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Title = "请选择谷歌浏览器地址";
-            dialog.Filter = "文本文件(*.exe)|*.exe";
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                string file = dialog.FileName;
-                Properties.Settings.Default.ExePath = file;
-                Properties.Settings.Default.Save();
-                WriteLogger($"执行路径已保存：{file}");
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(Properties.Settings.Default.ExePath))
-                {
-                    if (MessageBox.Show("是否要清除浏览器执行路径？", "确认删除", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        Properties.Settings.Default.ExePath = "";
-                        Properties.Settings.Default.Save();
-                    }
-                }
-            }
-        }
-
+        #region 2. 替换发布
         private void btn_post_Click(object sender, EventArgs e)
         {
             if (!ReadFileAutoPostAndReplay())
@@ -391,8 +522,49 @@ namespace JinQuanAdmin
             SetControllerEnable(false);
             ReplaceArticle();
         }
+        private bool ReadFileAutoPostAndReplay()
+        {
+            if (string.IsNullOrEmpty(FilePath))
+            {
+                MessageBox.Show("未找到文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            var txtHelper = new TxtHelper();
+            Articles = txtHelper.GetArticles(FilePath);
+            UserName = txtHelper.UserName;
+            Password = txtHelper.Password;
 
+            WriteLogger($"加载文件数量：{Articles.Count}");
 
+            WriteLogger($"登录账号：{UserName}");
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password))
+            {
+
+                MessageBox.Show("请检查文件未找到账号信息", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+        private void LoadDic()
+        {
+            if (dgv_replace.RowCount > 0)
+            {
+
+                for (int i = 0; i < dgv_replace.RowCount; i++)
+                {
+                    if (dgv_replace.Rows[i].Cells[0].Value != null)
+                    {
+                        string key = dgv_replace.Rows[i].Cells[0].Value.ToString();
+                        if (!ReplaceDic.ContainsKey(key))
+                        {
+                            ReplaceDic.Add(key.Trim(), dgv_replace.Rows[i].Cells[1]?.Value?.ToString() ?? "");
+                        }
+
+                    }
+                }
+
+            }
+        }
         private void ReplaceArticle()
         {
             Task.Run(() =>
@@ -407,7 +579,7 @@ namespace JinQuanAdmin
                     };
 
 
-                    foreach (var item in menuTypesSets)
+                    foreach (var item in _MenuTypesSets)
                     {
                         var urlList = crawle.GetArticleUrls(item, -1);
                         if (!urlList.Any())
@@ -434,6 +606,85 @@ namespace JinQuanAdmin
                 }
             });
         }
+
+        #endregion
+
+        #region 3. 爬取锚点
+        private void btn_pic_Click(object sender, EventArgs e)
+        {
+
+            if (!isHasFilePath())
+            {
+                return;
+            }
+            string filePath = GetNewPath($"-已查锚图");
+            var accounts = GetAccounts();
+            if (accounts == null || !accounts.Any())
+            {
+                return;
+            }
+            SetControllerEnable(false);
+            Task.Run(() =>
+            {
+
+                using (var crawle = new NewCrawle())
+                {
+                    try
+                    {
+                        foreach (var account in accounts)
+                        {
+                            LoginRetryNum = 0;
+                            if (!Login(crawle, account.UserName, account.Password))
+                            {
+
+                                WriteLogger("登录失败");
+                                continue;
+                            };
+                            WriteLogger("开始获取锚点");
+                            account.WriteAnchor = crawle.GetAnchorList();
+                            WriteLogger("获取锚点结束");
+                            var urls = crawle.GetArticleUrls(MenuType.produceList, -1, account.StartPaged, account.EndPaged);
+                            if (urls == null || !urls.Any())
+                            {
+                                WriteLogger("获取文章路径失败");
+                                continue;
+                            }
+
+                            WriteLogger("开始获取图片");
+                            foreach (var url in urls)
+                            {
+                                WriteLogger($"获取{url}图片");
+                                var pics = crawle.GetProductPic(url);
+                                if (pics.Any())
+                                {
+                                    account.WritePicUrl.AddRange(pics);
+                                }
+                            }
+                            WriteLogger("获取图片结束");
+
+                            WriteTxt(filePath, account);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
+                        SetControllerEnable(true);
+                        return;
+                    }
+                    SetControllerEnable(true);
+                    WriteLogger($"已导出文件{filePath}");
+                    WriteLogger("执行结束");
+                }
+
+            });
+        }
+
+
+
+        #endregion
+
+        #region 4. 收录更新
+
         private string proxt_address = "";
 
         /// <summary>
@@ -443,7 +694,7 @@ namespace JinQuanAdmin
         /// <param name="e"></param>
         private void btn_refresh_Click(object sender, EventArgs e)
         {
-            if (menuTypesSets.Count != 1 && (menuTypesSets.FirstOrDefault() != MenuType.WholesaleList || menuTypesSets.FirstOrDefault() != MenuType.WholesaleList))
+            if (_MenuTypesSets.Count != 1 && (_MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList || _MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList))
             {
                 MessageBox.Show("请选择一个栏目,不支持多选", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -462,81 +713,70 @@ namespace JinQuanAdmin
             SetControllerEnable(false);
             RefreshSetTop(accounts);
         }
-
-
-        public string GetNewPath(string fileName)
-        {
-            int index = FilePath.LastIndexOf(".");
-
-            string name = FilePath.Insert(index, fileName);
-            return name;
-        }
-
-
         private void RefreshSetTop(List<Account> accounts)
         {
 
             Task.Run(() =>
+            {
+                try
                 {
-                    try
+                    using (var crawle = new NewCrawle())
                     {
-                        using (var crawle = new NewCrawle())
+                        string filePath = GetNewPath($"-已查收录");
+                        foreach (var account in accounts)
                         {
-                            string filePath = GetNewPath($"-已查收录");
-                            foreach (var account in accounts)
+
+                            if (!crawle.Login(account.UserName, account.Password))
                             {
+                                WriteLogger("登录失败,请检查账号或者密码！");
+                                continue;
+                            };
 
-                                if (!crawle.Login(account.UserName, account.Password))
-                                {
-                                    WriteLogger("登录失败,请检查账号或者密码！");
-                                    continue;
-                                };
-
-                                int total;
-                                int pageTotal;
-                                var list = crawle.GetArticlesTitles(menuTypesSets.First(), -1, out total, out pageTotal);
-                                if (!list.Any())
-                                {
-                                    WriteLogger("没有获取到文章");
-                                    return;
-                                }
-                                Retry = 0;
-                                BaiduSearch(proxt_address, list);
-                                var topList = list.Where(s => s.IsIncluded).ToList();
-                                string includedMessage = "";
-                                if (topList == null || !topList.Any())
-                                {
-                                    includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
-                                    account.Included = includedMessage;
-                                    WriteLogger(includedMessage);
-                                    return;
-                                }
-                                int count = topList.Count;
-                                WriteLogger($"收录文章数:{count},开始刷新置顶");
-                                crawle.RefreshSetTop(topList, menuTypesSets.First());
-                                int needPage = ((count + 16 - 1) / 16) + 1;
-
-                                includedMessage = $"栏目：{menuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
-                                account.Included = includedMessage;
-
-                                WriteLogger(includedMessage);
-                                WriteTxt(filePath, account);
+                            int total;
+                            int pageTotal;
+                            var list = crawle.GetArticlesTitles(_MenuTypesSets.First(), -1, out total, out pageTotal);
+                            if (!list.Any())
+                            {
+                                WriteLogger("没有获取到文章");
+                                return;
                             }
-                            WriteLogger($"已导出文件{filePath}");
-                            WriteLogger($"执行结束");
-                            SetControllerEnable(true);
+                            Retry = 0;
+                            BaiduSearch(proxt_address, list);
+                            var topList = list.Where(s => s.IsIncluded).ToList();
+                            string includedMessage = "";
+                            if (topList == null || !topList.Any())
+                            {
+                                includedMessage = $"栏目：{_MenuTypesSets.First().GetDescription()}，收录文章数：{0},未收录文章数量：{total},未收录页数第：{1}--{pageTotal}";
+                                account.Included = includedMessage;
+                                WriteLogger(includedMessage);
+                                return;
+                            }
+                            int count = topList.Count;
+                            WriteLogger($"收录文章数:{count},开始刷新置顶");
+                            crawle.RefreshSetTop(topList, _MenuTypesSets.First());
+                            int needPage = ((count + 16 - 1) / 16) + 1;
 
+                            includedMessage = $"栏目：{_MenuTypesSets.First().GetDescription()}，收录文章数：{count},未收录文章数量：{total - count},未收录页数第：{needPage}--{pageTotal}";
+                            account.Included = includedMessage;
+
+                            WriteLogger(includedMessage);
+                            WriteTxt(filePath, account);
                         }
-
-                    }
-                    catch (Exception e)
-                    {
-
-                        WriteLogger($"执行异常{e.Message},{e.StackTrace}");
+                        WriteLogger($"已导出文件{filePath}");
                         WriteLogger($"执行结束");
                         SetControllerEnable(true);
+
                     }
-                });
+
+                }
+                catch (Exception e)
+                {
+
+                    WriteLogger($"执行异常{e.Message},{e.StackTrace}");
+                    WriteLogger($"执行结束");
+                    SetControllerEnable(true);
+                }
+            });
         }
         private static int Retry = 0;
 
@@ -580,21 +820,9 @@ namespace JinQuanAdmin
             }
         }
 
-        private bool isHasFilePath()
-        {
-            if (string.IsNullOrEmpty(FilePath))
-            {
-                MessageBox.Show("请选择文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
-        }
+        #endregion
 
-        /// <summary>
-        /// 锚点更新
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        #region 5. 锚点更新
         private void bt_anchor_Click(object sender, EventArgs e)
         {
             if (!isHasFilePath())
@@ -605,7 +833,6 @@ namespace JinQuanAdmin
             InsertAnchors();
 
         }
-
         private void InsertAnchors()
         {
             Task.Run(() =>
@@ -665,81 +892,9 @@ namespace JinQuanAdmin
             });
         }
 
-        private void btn_log_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.Title = "请选择保存文件路径";
-            saveFile.Filter = "文本文件|*.txt";
-            saveFile.OverwritePrompt = true;  //是否覆盖当前文件
-            saveFile.RestoreDirectory = true;  //还原目录
-            //saveFile.FileName = "替换日志" + DateTime.Now.ToString("yyyyMMddHH:mm:ss");
-            if (saveFile.ShowDialog() == DialogResult.OK)
-            {
-                string filepath = saveFile.FileName;
-                WriteTxt(filepath);
-                MessageBox.Show("导出成功", "消息");
-            }
-            else
-            {
-                return;
-            }
-        }
+        #endregion
 
-        public void WriteTxt(string path)
-        {
-            FileStream fs = new FileStream(path, FileMode.Create);
-            StreamWriter sw = new StreamWriter(fs);
-            //开始写入
-            sw.Write(txt_log.Text);
-            //清空缓冲区
-            sw.Flush();
-            //关闭流
-            sw.Close();
-            fs.Close();
-        }
-
-        public void WriteTxt(string path, List<Account> accounts)
-        {
-            FileStream fs = new FileStream(path, FileMode.Create);
-            StreamWriter sw = new StreamWriter(fs);
-            accounts.ForEach(s => sw.Write(s));
-            //清空缓冲区
-            sw.Flush();
-            //关闭流
-            sw.Close();
-            fs.Close();
-        }
-
-        public void WriteTxt(string path, Account account)
-        {
-            var bytes = System.Text.Encoding.Default.GetBytes(account.ToString());
-            using (var stream = new FileStream(path, FileMode.Append, FileAccess.Write))
-            {
-                stream.Write(bytes, 0, bytes.Length);
-            }
-
-        }
-
-        private Task CreateCrawle(List<Account> accounts, Action<List<Account>> action)
-        {
-            return Task.Run(() =>
-            {
-                using (var crawle = new NewCrawle())
-                {
-                    try
-                    {
-                        action(accounts);
-                    }
-                    catch (Exception ex)
-                    {
-                        WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
-                        return;
-                    }
-                }
-
-            });
-        }
-
+        #region 6. 更新手机
         private void btn_phone_Click(object sender, EventArgs e)
         {
 
@@ -778,117 +933,94 @@ namespace JinQuanAdmin
 
         }
 
-        int LoginRetryNum = 0;
-        private bool Login(NewCrawle crawle, string userName, string password)
-        {
-            if (!crawle.Login(userName, password))
-            {
-                LoginRetryNum++;
-                if (LoginRetryNum < 3)
-                {
-                    Login(crawle, userName, password);
-                }
-                WriteLogger("登录失败");
-                return false;
-            };
-            return true;
-        }
-        private void btn_pic_Click(object sender, EventArgs e)
-        {
+        #endregion
 
+        #region 7. 友情链接
+
+        private void btn_link_Click(object sender, EventArgs e)
+        {
             if (!isHasFilePath())
             {
                 return;
             }
-            string filePath = GetNewPath($"-已查锚图");
-            var accounts = GetAccounts();
+            var accounts = GetAccounts(() => TxtHelper.GetLinkAccounts(FilePath));
             if (accounts == null || !accounts.Any())
             {
                 return;
             }
             SetControllerEnable(false);
             Task.Run(() =>
+            {
+                WriteLogger($"开始添加友情链接");
+                try
                 {
-
                     using (var crawle = new NewCrawle())
                     {
-                        try
+                        foreach (var account in accounts)
                         {
-                            foreach (var account in accounts)
+                            if (!crawle.Login(account.UserName, account.Password))
                             {
-                                LoginRetryNum = 0;
-                                if (!Login(crawle, account.UserName, account.Password))
-                                {
-
-                                    WriteLogger("登录失败");
-                                    continue;
-                                };
-                                WriteLogger("开始获取锚点");
-                                account.WriteAnchor = crawle.GetAnchorList();
-                                WriteLogger("获取锚点结束");
-                                var urls = crawle.GetArticleUrls(MenuType.produceList, -1, account.StartPaged, account.EndPaged);
-                                if (urls == null || !urls.Any())
-                                {
-                                    WriteLogger("获取文章路径失败");
-                                    continue;
-                                }
-
-                                WriteLogger("开始获取图片");
-                                foreach (var url in urls)
-                                {
-                                    WriteLogger($"获取{url}图片");
-                                    var pics = crawle.GetProductPic(url);
-                                    if (pics.Any())
-                                    {
-                                        account.WritePicUrl.AddRange(pics);
-                                    }
-                                }
-                                WriteLogger("获取图片结束");
-
-                                WriteTxt(filePath, account);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            WriteLogger($"执行出错，{ex.Message},{ex.StackTrace}");
-                            SetControllerEnable(true);
-                            return;
+                                WriteLogger("登录失败");
+                                continue;
+                            };
+                            WriteLogger($"{account?.Company}添加链接数量 {account.LinkUrl.Count()}");
+                            crawle.AddLinkList(account.LinkUrl);
+                            WriteLogger($"{account?.Company}添加链接完成");
                         }
                         SetControllerEnable(true);
-                        WriteLogger($"已导出文件{filePath}");
-                        WriteLogger("执行结束");
                     }
-
-                });
-        }
-
-
-        /// <summary>
-        /// 获取账号
-        /// </summary>
-        /// <returns></returns>
-        private List<Account> GetAccounts()
-        {
-            try
-            {
-
-                WriteLogger("开始加载文件中账号");
-                var list = TxtHelper.GetAccounts(FilePath);
-                if (!list.Any())
-                {
-                    WriteLogger("文件读取到账号请检查文件");
                 }
-                WriteLogger($"账号加载结束,加载账号数{list.Count}");
-                return list;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("文件格式不正确", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
+                catch (Exception ex)
+                {
+                    WriteLogger($"链接添加异常，请将错误复制给管理员{ex.Message},{ex.StackTrace}");
+                    throw;
+                }
+            });
         }
+        #endregion
 
+        #endregion
 
+        private void btn_function_setting_Click(object sender, EventArgs e)
+        {
+            if (!isHasFilePath())
+            {
+                return;
+            }
+            var accounts = GetAccounts(() => TxtHelper.GetLinkAccounts(FilePath));
+            if (accounts == null || !accounts.Any())
+            {
+                return;
+            }
+            SetControllerEnable(false);
+            Task.Run(() =>
+            {
+                WriteLogger($"开始功能设置");
+                try
+                {
+                    using (var crawle = new NewCrawle())
+                    {
+                        foreach (var account in accounts)
+                        {
+                            if (!crawle.Login(account.UserName, account.Password))
+                            {
+                                WriteLogger("登录失败");
+                                continue;
+                            };
+                            WriteLogger($"{account?.Company}功能设置");
+                            crawle.ChangeFunctionSetting(account.IsCopy,account.IsApp);
+                            WriteLogger($"{account?.Company}功能设置完成");
+                        }
+                        SetControllerEnable(true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLogger($"链接添加异常，请将错误复制给管理员{ex.Message},{ex.StackTrace}");
+                    throw;
+                }
+            });
+        }
     }
 
 }

@@ -205,6 +205,63 @@ namespace JinQuanAdmin.Common
         }
 
 
+        public static List<LinkAccount> GetLinkAccounts(string fileName)
+        {
+            List<LinkAccount> anchors = new List<LinkAccount>();
+            DetectionResult result = CharsetDetector.DetectFromFile(fileName);
+            var allLines = File.ReadAllLines(fileName, result.Detected.Encoding);
+            LinkAccount anchor = null;
+            foreach (var line in allLines)
+            {
+                if (line.Contains("#公司#"))
+                {
+                    if (anchor != null)
+                    {
+                        anchors.Add(anchor);
+                    }
+                    anchor = new LinkAccount();
+                    string nameAndPwd = line.Replace("#公司#", "");
+                    anchor.Company = nameAndPwd;
+                    continue;
+                }
+                if (line.Contains("#账号#"))
+                {
+
+                    string nameAndPwd = line.Replace("#账号#", "");
+                    var arrays = nameAndPwd.Split(new string[] { "--" }, StringSplitOptions.None);
+
+                    anchor.SetNameAndPassword(arrays[0], arrays[1]);
+
+                    continue;
+                }
+                if (line.Contains("#是否禁止复制#"))
+                {
+                    string isCopyStr = line.Replace("#是否禁止复制#", "");
+                    anchor.IsCopy = isCopyStr.Trim().Equals("是");
+                    continue;
+                }
+                if (line.Contains("#是否手机网站#"))
+                {
+                    string isAppStr = line.Replace("#是否手机网站#", "");
+                    anchor.IsApp = isAppStr.Trim().Equals("是");
+                    continue;
+                }
+                if (line.Contains("#链接#"))
+                {
+                    string titleAndLink = line.Replace("#链接#", "");
+                    var arrays = titleAndLink.Split(new string[] { "--" }, StringSplitOptions.None);
+                    anchor.LinkUrl.Add(new LinkModel(arrays[0], arrays[1]));
+                }
+            }
+            if (anchor != null)
+            {
+                anchors.Add(anchor);
+            }
+            return anchors;
+        }
+
+
+
         private static string ReplayPic(string line)
         {
             return Regex.Replace(line, "@图片开始@(.*?)@图片结束@", "<p></p><p></p><p style=\"text-align: center; \"><img src=\"$1\" style =\"max-width: 100%;\"></p>");

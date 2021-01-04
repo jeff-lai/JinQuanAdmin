@@ -29,7 +29,7 @@
     <ProductName>替换</ProductName>
     <PublisherName>LWF</PublisherName>
     <SuiteName>金泉网辅助</SuiteName>
-    <ApplicationRevision>25</ApplicationRevision>
+    <ApplicationRevision>26</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -168,11 +168,13 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\Account.cs" />
+    <Compile Include="Model\AccountBase.cs" />
     <Compile Include="Model\Article.cs" />
     <Compile Include="Model\ArticleTitle.cs" />
     <Compile Include="Model\BaiduResponseResult.cs" />
     <Compile Include="Model\BaseModel.cs" />
     <Compile Include="Model\CommonModel.cs" />
+    <Compile Include="Model\LinkAccount.cs" />
     <Compile Include="Model\LoginModel.cs" />
     <Compile Include="Model\MenuType.cs" />
     <Compile Include="Model\NewsModel.cs" />
@@ -233,5 +235,7 @@
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
+
   </Target>
+
 </Project>

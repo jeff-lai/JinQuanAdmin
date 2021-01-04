@@ -1,28 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace JinQuanAdmin.Model
 {
-    public class Account
+    public class Account : AccountBase
     {
-        /// <summary>
-        /// 公司
-        /// </summary>
-        public string Company { get; set; }
-
-
-        /// <summary>
-        /// 用户名
-        /// </summary>
-        public string UserName { get; set; }
-        /// <summary>
-        /// 密码
-        /// </summary>
-        public string Password { get; set; }
-
         /// <summary>
         /// 手机
         /// </summary>
@@ -77,11 +60,6 @@ namespace JinQuanAdmin.Model
             return content.ToString();
         }
 
-        internal void SetNameAndPassword(string userName, string password)
-        {
-            UserName = userName;
-            Password = password;
-        }
 
         public override string ToString()
         {
@@ -94,7 +72,7 @@ namespace JinQuanAdmin.Model
             }
             if (!string.IsNullOrEmpty(Included))
             {
-                sb.AppendLine($"#收录情况#{this.Included}");                
+                sb.AppendLine($"#收录情况#{this.Included}");
             }
             sb.AppendLine($"#瞄点#{this.OriginAnchor + string.Join("|", this.WriteAnchor)}");
             sb.AppendLine($"#图片链接#");
