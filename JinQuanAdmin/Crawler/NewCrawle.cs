@@ -23,10 +23,10 @@ namespace JinQuanAdmin.Crawler
             var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
-        
+
                 var options = new ChromeOptions();
-                //driverService.HideCommandPromptWindow = true;
-                //options.AddArguments("--headless");
+                driverService.HideCommandPromptWindow = true;
+                options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
                 options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
@@ -674,9 +674,14 @@ namespace JinQuanAdmin.Crawler
 
 
         private string link_title = "//form[@id='Form1']//input[@name='txtTitle']";
-        private string link_url= "//form[@id='Form1']//input[@name='txtUrl']";
-        private string link_submit= "//form[@id='Form1']//input[@type='submit']";
-        private string link_max_num = "/html[1]/body[1]/div[3]/div[1]/div[2]/div[4]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]//tr[last()]/td[1]";
+        private string link_url = "//form[@id='Form1']//input[@name='txtUrl']";
+        private string link_submit = "//form[@id='Form1']//input[@type='submit']";
+        private string link_max_num = "//td[@class='list_right_box']//tbody//tr[last()]/td[1]";
+
+        public bool IsNumeric(string value)
+        {
+            return Regex.IsMatch(value, @"^[+-]?\d*[.]?\d*$");
+        }
 
         /// <summary>
         /// 添加友情链接
@@ -693,22 +698,26 @@ namespace JinQuanAdmin.Crawler
             string url = cuurentUrl.Substring(0, cuurentUrl.LastIndexOf("/")) + function_link_url;
             _webDriver.Navigate().GoToUrl(url);
             Thread.Sleep(2_000);
-            var jsDriver = (IJavaScriptExecutor)_webDriver;
-            foreach (var item in linkModels)
+            string numStr = _webDriver.FindElement(By.XPath(link_max_num),10).Text;
+            if (IsNumeric(numStr))
             {
-                int num = Convert.ToInt32(_webDriver.FindElement(By.XPath(link_max_num)).Text);
-                if (num == 10)
+                var num = Convert.ToInt32(numStr);
+                for (int i = 0; i < num; i++)
                 {
-                    LogHelper.LogAction.Invoke($"添加失败，友情链接已上限10个,不能添加");
-                    return;
+                    _webDriver.FindElement(By.Id($"del0")).Click();
                 }
+            }
+            var jsDriver = (IJavaScriptExecutor)_webDriver;
+            foreach (var item in linkModels.Take(10))
+            {
+
                 LogHelper.LogAction.Invoke($"添加链接{item.Url}");
                 jsDriver.ExecuteScript($"showDiv();");
                 _webDriver.FindElement(By.XPath(link_title)).SendKeys(item.Title);
                 _webDriver.FindElement(By.XPath(link_url)).SendKeys(item.Url);
-                _webDriver.FindElement(By.XPath(link_submit)).Click();
-                Thread.Sleep(2_000);
-            }         
+                _webDriver.FindElement(By.XPath(link_submit),10).Click();
+                Thread.Sleep(1_500);
+            }
         }
 
         private string function_is_copy = "//input[@name='radiowIsCopy' and  @value='#value#']";
@@ -716,7 +725,7 @@ namespace JinQuanAdmin.Crawler
         private string function_is_copy_submit = "//body[1]/form[1]/div[5]/div[1]/div[2]/div[3]/table[1]/tbody[1]/tr[3]/td[1]/input[1]";
         private string function_is_app_submit = "//body[1]/form[1]/div[5]/div[1]/div[2]/div[4]/table[1]/tbody[1]/tr[3]/td[1]/input[1]";
 
-        public void ChangeFunctionSetting(bool? isCopy,bool? isApp)
+        public void ChangeFunctionSetting(bool? isCopy, bool? isApp)
         {
 
             Thread.Sleep(1_000);
