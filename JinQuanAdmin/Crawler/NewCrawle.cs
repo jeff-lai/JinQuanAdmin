@@ -494,6 +494,8 @@ namespace JinQuanAdmin.Crawler
         private string baidu_rows = "//body//div[contains(@class,'result') and contains(@class,'c-container') and contains(@class,'new-pmd')]//h3[@class='t']";
 
         private string baidu_first_match = "//div[@class='c-line-clamp1']";
+
+        private bool first_enter = true;
         /// <summary>
         /// 百度是否收录
         /// </summary>
@@ -509,8 +511,16 @@ namespace JinQuanAdmin.Crawler
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
             _webDriver.Navigate().GoToUrl(baiduUrl);
+            if (first_enter)
+            {
+                Thread.Sleep(3000);
+                first_enter = false;
+            }
+            else
+            {
+                Thread.Sleep(1000);
+            }
 
-            Thread.Sleep(1000);
             if (_webDriver.PageSource.Length < 100)
             {
                 return BaiduResponseResult.ProxyException;
@@ -698,7 +708,7 @@ namespace JinQuanAdmin.Crawler
             string url = cuurentUrl.Substring(0, cuurentUrl.LastIndexOf("/")) + function_link_url;
             _webDriver.Navigate().GoToUrl(url);
             Thread.Sleep(2_000);
-            string numStr = _webDriver.FindElement(By.XPath(link_max_num),10).Text;
+            string numStr = _webDriver.FindElement(By.XPath(link_max_num), 10).Text;
             if (IsNumeric(numStr))
             {
                 var num = Convert.ToInt32(numStr);
@@ -715,7 +725,7 @@ namespace JinQuanAdmin.Crawler
                 jsDriver.ExecuteScript($"showDiv();");
                 _webDriver.FindElement(By.XPath(link_title)).SendKeys(item.Title);
                 _webDriver.FindElement(By.XPath(link_url)).SendKeys(item.Url);
-                _webDriver.FindElement(By.XPath(link_submit),10).Click();
+                _webDriver.FindElement(By.XPath(link_submit), 10).Click();
                 Thread.Sleep(1_500);
             }
         }
