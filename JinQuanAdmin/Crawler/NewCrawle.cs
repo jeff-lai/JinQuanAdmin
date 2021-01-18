@@ -503,10 +503,7 @@ namespace JinQuanAdmin.Crawler
         /// <returns></returns>
         public BaiduResponseResult IsBaiduRecord(string title)
         {
-            if (title.Length > 25)
-            {
-                title = title.Substring(0, 25);
-            }
+   
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
@@ -528,6 +525,10 @@ namespace JinQuanAdmin.Crawler
             if (!_webDriver.IsElementExist(By.Id("container")))
             {
                 return BaiduResponseResult.IpBlackIntercept;
+            }
+            if (newTitle.Length > 27)
+            {
+                newTitle = newTitle.Substring(0, 27);
             }
             if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
             {
