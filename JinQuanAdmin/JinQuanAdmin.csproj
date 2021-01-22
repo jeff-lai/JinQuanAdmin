@@ -15,7 +15,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\LWF\source\repos\JinQuanAdmin\WebSite\</PublishUrl>
+    <PublishUrl>E:\dotnet\JinQuanAdmin\JinQuanAdmin\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -29,7 +29,7 @@
     <ProductName>替换</ProductName>
     <PublisherName>LWF</PublisherName>
     <SuiteName>金泉网辅助</SuiteName>
-    <ApplicationRevision>32</ApplicationRevision>
+    <ApplicationRevision>34</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

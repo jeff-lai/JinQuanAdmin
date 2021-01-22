@@ -367,7 +367,7 @@ namespace JinQuanAdmin.Crawler
                     }
 
                     string tag = string.IsNullOrEmpty(article.Tag) ? article.Title : article.Tag;
-                    jsDriver.ExecuteScript($"document.getElementById('{tag_id}').value = '{tag}';");
+                    jsDriver.ExecuteScript($"document.getElementsByName('{tag_id}').value = '{tag}';");
                 }
                 else
                 {
@@ -764,13 +764,13 @@ namespace JinQuanAdmin.Crawler
             {
                 LogHelper.LogAction.Invoke($"设置移动端访问二级网址显示");
                 var elem = "";
-                if (isCopy.Value)
+                if (isApp.Value)
                 {
-                    elem = function_is_app.Replace("#value#", "1");
+                    elem = function_is_app.Replace("#value#", "0");
                 }
                 else
                 {
-                    elem = function_is_app.Replace("#value#", "0");
+                    elem = function_is_app.Replace("#value#", "1");
                 }
                 _webDriver.FindElement(By.XPath(elem)).Click();
                 _webDriver.FindElement(By.XPath(function_is_app_submit)).Click();
