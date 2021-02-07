@@ -15,7 +15,7 @@ namespace JinQuanAdmin.Model
         Included=1,
         [Description("查询结果空，疑似代理异常")]
         ProxyException = 2,
-        [Description("IP黑名单,已重查5次失败")]
+        [Description("IP黑名单,已重查10次失败")]
         IpBlackIntercept=3
 
     }

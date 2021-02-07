@@ -367,7 +367,10 @@ namespace JinQuanAdmin.Crawler
                     }
 
                     string tag = string.IsNullOrEmpty(article.Tag) ? article.Title : article.Tag;
-                    jsDriver.ExecuteScript($"document.getElementsByName('{tag_id}').value = '{tag}';");
+                    var tagEl = _webDriver.FindElement(By.Id(tag_id), 3);
+                    tagEl.Clear();
+                    tagEl.SendKeys(tag);
+                    //jsDriver.ExecuteScript($"document.getElementsByName('{tag_id}').value = '{tag}';");
                 }
                 else
                 {
@@ -503,7 +506,7 @@ namespace JinQuanAdmin.Crawler
         /// <returns></returns>
         public BaiduResponseResult IsBaiduRecord(string title)
         {
-   
+
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
