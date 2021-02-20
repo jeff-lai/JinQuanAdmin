@@ -789,11 +789,15 @@ namespace JinQuanAdmin
                 {
                     foreach (var item in articles)
                     {
-                        int retryCount = 1;
+                        int retryCount = 0;
                         var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
                             .Retry(10).Execute(() =>
                             {
-                                WriteLogger($"标题：{item.Title},IP黑名单搜索{retryCount++}");
+                                if (retryCount > 0)
+                                {
+                                    WriteLogger($"标题：{item.Title},IP黑名单搜索{ retryCount}");
+                                }
+                                retryCount++;
                                 return baidu.IsBaiduRecord(item.Title);
                             });
                         //var result = baidu.IsBaiduRecord(item.Title);                        

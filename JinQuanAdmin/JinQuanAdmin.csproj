@@ -29,7 +29,7 @@
     <ProductName>替换</ProductName>
     <PublisherName>LWF</PublisherName>
     <SuiteName>金泉网辅助</SuiteName>
-    <ApplicationRevision>35</ApplicationRevision>
+    <ApplicationRevision>36</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

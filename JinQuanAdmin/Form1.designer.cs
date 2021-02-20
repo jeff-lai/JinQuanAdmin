@@ -228,7 +228,7 @@
             this.txt_ptoxy.Name = "txt_ptoxy";
             this.txt_ptoxy.Size = new System.Drawing.Size(193, 21);
             this.txt_ptoxy.TabIndex = 10;
-            this.txt_ptoxy.Text = "tps134.kdlapi.com:15818";
+            this.txt_ptoxy.Text = "tps186.kdlapi.com:15818";
             // 
             // label1
             // 
