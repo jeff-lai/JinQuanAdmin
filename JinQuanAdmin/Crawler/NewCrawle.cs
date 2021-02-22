@@ -46,7 +46,7 @@ namespace JinQuanAdmin.Crawler
                     options.AddArgument("--proxy-server=http://" + proxy);
 
                 }
-                _webDriver = new ChromeDriver(driverService, options);
+                _webDriver = new ChromeDriver(driverService, options, TimeSpan.FromMinutes(5));
             }
             catch (Exception e)
             {
@@ -785,8 +785,7 @@ namespace JinQuanAdmin.Crawler
         {
             if (_webDriver != null)
             {
-                _webDriver.Dispose();
-
+                _webDriver.Close();
             }
         }
     }
