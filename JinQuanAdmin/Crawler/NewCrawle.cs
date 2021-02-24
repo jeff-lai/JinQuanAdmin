@@ -520,7 +520,10 @@ namespace JinQuanAdmin.Crawler
             {
                 Thread.Sleep(1000);
             }
-
+            if (_webDriver.Url.Contains("wappass"))
+            {
+                return BaiduResponseResult.IpBlackIntercept;
+            }
             if (_webDriver.PageSource.Length < 100)
             {
                 return BaiduResponseResult.ProxyException;

@@ -783,19 +783,23 @@ namespace JinQuanAdmin
 
         private void BaiduSearch(string proxy, List<ArticleTitle> articles)
         {
+
             using (var baidu = new NewCrawle(proxy))
             {
                 try
                 {
+
                     foreach (var item in articles)
                     {
                         int retryCount = 0;
                         var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
-                            .Retry(10).Execute(() =>
+                            .Retry(10)
+                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.None).Retry(3))
+                            .Execute(() =>
                             {
                                 if (retryCount > 0)
                                 {
-                                    WriteLogger($"标题：{item.Title},IP黑名单搜索{ retryCount}");
+                                    WriteLogger($"标题：{item.Title},重新搜索第 { retryCount} 次");
                                 }
                                 retryCount++;
                                 return baidu.IsBaiduRecord(item.Title);
