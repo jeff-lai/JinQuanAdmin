@@ -350,31 +350,31 @@ namespace JinQuanAdmin.Crawler
                 var jsDriver = (IJavaScriptExecutor)_webDriver;
 
                 string title = article.Title;
-                bool isAppendContent = Form1.IsIgnoreTitle;
+                bool isIgnoreTitle = Form1.IsIgnoreTitle;
 
 
                 if (menuType == MenuType.produceList)
                 {
                     //_webDriver.FindElement(By.Id(pro_title_id), 10).SendKeys(article.Title);
                     //_webDriver.FindElement(By.Id(pro_title_id), 10).SendKeys(article.Title);
-                    if (isAppendContent)
+                    if (isIgnoreTitle)
                     {
                         title = jsDriver.ExecuteScript($"return document.getElementById('{pro_title_id}').value;").ToString();
                     }
                     else
                     {
                         jsDriver.ExecuteScript($"document.getElementById('{pro_title_id}').value = '{title}';");
+                        string tag = string.IsNullOrEmpty(article.Tag) ? article.Title : article.Tag;
+                        var tagEl = _webDriver.FindElement(By.Id(tag_id), 3);
+                        tagEl.Clear();
+                        tagEl.SendKeys(tag);
                     }
 
-                    string tag = string.IsNullOrEmpty(article.Tag) ? article.Title : article.Tag;
-                    var tagEl = _webDriver.FindElement(By.Id(tag_id), 3);
-                    tagEl.Clear();
-                    tagEl.SendKeys(tag);
                     //jsDriver.ExecuteScript($"document.getElementsByName('{tag_id}').value = '{tag}';");
                 }
                 else
                 {
-                    if (isAppendContent)
+                    if (isIgnoreTitle)
                     {
                         title = jsDriver.ExecuteScript($"return document.getElementById('{title_id}').value;").ToString();
                     }
@@ -385,7 +385,7 @@ namespace JinQuanAdmin.Crawler
 
                 }
                 var context = article.Content;
-                if (isAppendContent)
+                if (isIgnoreTitle)
                 {
                     int firstPeriod = context.IndexOf('。') + 1;
                     context = context.Insert(firstPeriod, title + "。");
