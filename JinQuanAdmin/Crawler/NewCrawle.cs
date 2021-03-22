@@ -77,7 +77,7 @@ namespace JinQuanAdmin.Crawler
             try
             {
                 LogHelper.LogAction.Invoke($"账号：{username}，开始登陆");
-
+                closeAllALert();
                 CleanCookie();
                 _webDriver.Navigate().GoToUrl(login_url);
                 Thread.Sleep(2_000);
@@ -662,6 +662,7 @@ namespace JinQuanAdmin.Crawler
 
             _webDriver.FindElement(By.Id(xpath_compay_contact_submit_id), 10).Click();
             Thread.Sleep(1_000);
+            closeAllALert();
         }
 
         private string xpath_company_keyword_name = "//input[@name='txtkeyword']";
