@@ -29,7 +29,7 @@ namespace JinQuanAdmin.Crawler
                 options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
-                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
+                //options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
                 string exePath = Properties.Settings.Default.ExePath;
 
                 if (!string.IsNullOrEmpty(exePath))
@@ -86,10 +86,12 @@ namespace JinQuanAdmin.Crawler
                 _webDriver.FindElement(By.Id(loing_submit_id), 10).Click();
                 Thread.Sleep(3_000);
                 closeAllALert();
-
+                if (_webDriver.IsElementExist(By.Id("hide")))
+                {
+                    return false;
+                }
                 if (_webDriver.Url.Contains("error"))
                 {
-
                     return false;
                 }
                 _webDriver.Navigate().GoToUrl(back_url);
