@@ -87,7 +87,8 @@ namespace JinQuanAdmin.Common
         {
             string newLine = Regex.Replace(line, "@图片开始@(.*?)@图片结束@", "<p style=\"text-align: center; \"><img src=\"$1\" style =\"max-width: 100%;\"></p>");
 
-            newLine = Regex.Replace(newLine, "[（(](.*?)[)）]", "<b>$1</b>");
+            //newLine = Regex.Replace(newLine, "[（(](.*?)[)）]", "<b>$1</b>");
+            newLine = Regex.Replace(newLine, "《《(.*?)》》", "<b>$1</b>");
             newLine = Regex.Replace(newLine, "@瞄点开始@(.*?)@瞄点结束@", "<a name=\"$1\"></a>");
             return string.Format(PLine, newLine);
 
