@@ -367,7 +367,7 @@ namespace JinQuanAdmin.Crawler
                     {
                         jsDriver.ExecuteScript($"document.getElementById('{pro_title_id}').value = '{title}';");
                         string tag = string.IsNullOrEmpty(article.Tag) ? article.Title : article.Tag;
-                        var tagEl = _webDriver.FindElement(By.Id(tag_id), 3);
+                        var tagEl = _webDriver.FindElement(By.Name(tag_id), 3);
                         tagEl.Clear();
                         tagEl.SendKeys(tag);
                     }
