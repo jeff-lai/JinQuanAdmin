@@ -60,31 +60,32 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.txt_log);
-            this.groupBox1.Location = new System.Drawing.Point(289, 19);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox1.Location = new System.Drawing.Point(385, 24);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(684, 350);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox1.Size = new System.Drawing.Size(912, 438);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "日志";
             // 
             // txt_log
             // 
-            this.txt_log.Location = new System.Drawing.Point(15, 18);
-            this.txt_log.Margin = new System.Windows.Forms.Padding(2);
+            this.txt_log.Location = new System.Drawing.Point(20, 22);
+            this.txt_log.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txt_log.Multiline = true;
             this.txt_log.Name = "txt_log";
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txt_log.Size = new System.Drawing.Size(652, 318);
+            this.txt_log.Size = new System.Drawing.Size(868, 396);
             this.txt_log.TabIndex = 0;
             this.txt_log.TextChanged += new System.EventHandler(this.txt_log_TextChanged);
             // 
             // btn_file
             // 
-            this.btn_file.Location = new System.Drawing.Point(16, 19);
+            this.btn_file.Location = new System.Drawing.Point(21, 24);
+            this.btn_file.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btn_file.Name = "btn_file";
-            this.btn_file.Size = new System.Drawing.Size(247, 34);
+            this.btn_file.Size = new System.Drawing.Size(329, 42);
             this.btn_file.TabIndex = 2;
             this.btn_file.Text = "选择文件";
             this.btn_file.UseVisualStyleBackColor = true;
@@ -95,11 +96,11 @@
             this.gb_ck_menu.Controls.Add(this.checkBox3);
             this.gb_ck_menu.Controls.Add(this.checkBox2);
             this.gb_ck_menu.Controls.Add(this.checkBox1);
-            this.gb_ck_menu.Location = new System.Drawing.Point(16, 68);
-            this.gb_ck_menu.Margin = new System.Windows.Forms.Padding(2);
+            this.gb_ck_menu.Location = new System.Drawing.Point(21, 85);
+            this.gb_ck_menu.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.gb_ck_menu.Name = "gb_ck_menu";
-            this.gb_ck_menu.Padding = new System.Windows.Forms.Padding(2);
-            this.gb_ck_menu.Size = new System.Drawing.Size(150, 82);
+            this.gb_ck_menu.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gb_ck_menu.Size = new System.Drawing.Size(200, 102);
             this.gb_ck_menu.TabIndex = 3;
             this.gb_ck_menu.TabStop = false;
             this.gb_ck_menu.Text = "栏目";
@@ -107,10 +108,10 @@
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(14, 59);
-            this.checkBox3.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox3.Location = new System.Drawing.Point(19, 74);
+            this.checkBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(72, 16);
+            this.checkBox3.Size = new System.Drawing.Size(89, 19);
             this.checkBox3.TabIndex = 5;
             this.checkBox3.Tag = "3";
             this.checkBox3.Text = "供求信息";
@@ -119,10 +120,10 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(14, 39);
-            this.checkBox2.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox2.Location = new System.Drawing.Point(19, 49);
+            this.checkBox2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(72, 16);
+            this.checkBox2.Size = new System.Drawing.Size(89, 19);
             this.checkBox2.TabIndex = 4;
             this.checkBox2.Tag = "2";
             this.checkBox2.Text = "公司新闻";
@@ -131,10 +132,10 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(14, 20);
-            this.checkBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox1.Location = new System.Drawing.Point(19, 25);
+            this.checkBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(72, 16);
+            this.checkBox1.Size = new System.Drawing.Size(89, 19);
             this.checkBox1.TabIndex = 3;
             this.checkBox1.Tag = "1";
             this.checkBox1.Text = "产品展示";
@@ -142,10 +143,10 @@
             // 
             // btn_save
             // 
-            this.btn_save.Location = new System.Drawing.Point(15, 162);
-            this.btn_save.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_save.Location = new System.Drawing.Point(20, 202);
+            this.btn_save.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_save.Name = "btn_save";
-            this.btn_save.Size = new System.Drawing.Size(69, 38);
+            this.btn_save.Size = new System.Drawing.Size(92, 48);
             this.btn_save.TabIndex = 4;
             this.btn_save.Text = "自动发布";
             this.btn_save.UseVisualStyleBackColor = true;
@@ -153,10 +154,10 @@
             // 
             // btn_setting
             // 
-            this.btn_setting.Location = new System.Drawing.Point(186, 127);
-            this.btn_setting.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_setting.Location = new System.Drawing.Point(248, 159);
+            this.btn_setting.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_setting.Name = "btn_setting";
-            this.btn_setting.Size = new System.Drawing.Size(89, 22);
+            this.btn_setting.Size = new System.Drawing.Size(119, 28);
             this.btn_setting.TabIndex = 5;
             this.btn_setting.Text = "设置浏览器";
             this.btn_setting.UseVisualStyleBackColor = true;
@@ -169,11 +170,12 @@
             this.dgv_replace.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.c_key,
             this.c_value});
-            this.dgv_replace.Location = new System.Drawing.Point(15, 387);
+            this.dgv_replace.Location = new System.Drawing.Point(20, 484);
+            this.dgv_replace.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgv_replace.Name = "dgv_replace";
             this.dgv_replace.RowHeadersWidth = 51;
             this.dgv_replace.RowTemplate.Height = 23;
-            this.dgv_replace.Size = new System.Drawing.Size(958, 232);
+            this.dgv_replace.Size = new System.Drawing.Size(1277, 290);
             this.dgv_replace.TabIndex = 6;
             // 
             // c_key
@@ -190,10 +192,10 @@
             // 
             // btn_post
             // 
-            this.btn_post.Location = new System.Drawing.Point(100, 162);
-            this.btn_post.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_post.Location = new System.Drawing.Point(133, 202);
+            this.btn_post.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_post.Name = "btn_post";
-            this.btn_post.Size = new System.Drawing.Size(71, 38);
+            this.btn_post.Size = new System.Drawing.Size(95, 48);
             this.btn_post.TabIndex = 7;
             this.btn_post.Text = "替换发布";
             this.btn_post.UseVisualStyleBackColor = true;
@@ -202,20 +204,20 @@
             // cb_removeTitle
             // 
             this.cb_removeTitle.AutoSize = true;
-            this.cb_removeTitle.Location = new System.Drawing.Point(186, 82);
-            this.cb_removeTitle.Margin = new System.Windows.Forms.Padding(2);
+            this.cb_removeTitle.Location = new System.Drawing.Point(248, 102);
+            this.cb_removeTitle.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cb_removeTitle.Name = "cb_removeTitle";
-            this.cb_removeTitle.Size = new System.Drawing.Size(96, 16);
+            this.cb_removeTitle.Size = new System.Drawing.Size(119, 19);
             this.cb_removeTitle.TabIndex = 8;
             this.cb_removeTitle.Text = "发布忽略标题";
             this.cb_removeTitle.UseVisualStyleBackColor = true;
             // 
             // btn_refresh
             // 
-            this.btn_refresh.Location = new System.Drawing.Point(14, 216);
-            this.btn_refresh.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_refresh.Location = new System.Drawing.Point(19, 270);
+            this.btn_refresh.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_refresh.Name = "btn_refresh";
-            this.btn_refresh.Size = new System.Drawing.Size(70, 37);
+            this.btn_refresh.Size = new System.Drawing.Size(93, 46);
             this.btn_refresh.TabIndex = 9;
             this.btn_refresh.Text = "收录更新";
             this.btn_refresh.UseVisualStyleBackColor = true;
@@ -223,29 +225,28 @@
             // 
             // txt_ptoxy
             // 
-            this.txt_ptoxy.Location = new System.Drawing.Point(67, 322);
-            this.txt_ptoxy.Margin = new System.Windows.Forms.Padding(2);
+            this.txt_ptoxy.Location = new System.Drawing.Point(89, 402);
+            this.txt_ptoxy.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txt_ptoxy.Name = "txt_ptoxy";
-            this.txt_ptoxy.Size = new System.Drawing.Size(193, 21);
+            this.txt_ptoxy.Size = new System.Drawing.Size(256, 25);
             this.txt_ptoxy.TabIndex = 10;
-            this.txt_ptoxy.Text = "tps186.kdlapi.com:15818";
+            this.txt_ptoxy.Text = "proxy.wandouip.com:8090";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 325);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(15, 406);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 12);
+            this.label1.Size = new System.Drawing.Size(67, 15);
             this.label1.TabIndex = 11;
             this.label1.Text = "代理地址";
             // 
             // btn_anchor
             // 
-            this.btn_anchor.Location = new System.Drawing.Point(100, 216);
-            this.btn_anchor.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_anchor.Location = new System.Drawing.Point(133, 270);
+            this.btn_anchor.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_anchor.Name = "btn_anchor";
-            this.btn_anchor.Size = new System.Drawing.Size(71, 37);
+            this.btn_anchor.Size = new System.Drawing.Size(95, 46);
             this.btn_anchor.TabIndex = 12;
             this.btn_anchor.Text = "锚点更新";
             this.btn_anchor.UseVisualStyleBackColor = true;
@@ -253,10 +254,10 @@
             // 
             // btn_pic
             // 
-            this.btn_pic.Location = new System.Drawing.Point(191, 162);
-            this.btn_pic.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_pic.Location = new System.Drawing.Point(255, 202);
+            this.btn_pic.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_pic.Name = "btn_pic";
-            this.btn_pic.Size = new System.Drawing.Size(69, 38);
+            this.btn_pic.Size = new System.Drawing.Size(92, 48);
             this.btn_pic.TabIndex = 13;
             this.btn_pic.Text = "爬取锚图";
             this.btn_pic.UseVisualStyleBackColor = true;
@@ -264,10 +265,10 @@
             // 
             // btn_log
             // 
-            this.btn_log.Location = new System.Drawing.Point(186, 102);
-            this.btn_log.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_log.Location = new System.Drawing.Point(248, 128);
+            this.btn_log.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_log.Name = "btn_log";
-            this.btn_log.Size = new System.Drawing.Size(89, 21);
+            this.btn_log.Size = new System.Drawing.Size(119, 26);
             this.btn_log.TabIndex = 14;
             this.btn_log.Text = "导出日志";
             this.btn_log.UseVisualStyleBackColor = true;
@@ -275,10 +276,10 @@
             // 
             // btn_phone
             // 
-            this.btn_phone.Location = new System.Drawing.Point(191, 216);
-            this.btn_phone.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_phone.Location = new System.Drawing.Point(255, 270);
+            this.btn_phone.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_phone.Name = "btn_phone";
-            this.btn_phone.Size = new System.Drawing.Size(69, 37);
+            this.btn_phone.Size = new System.Drawing.Size(92, 46);
             this.btn_phone.TabIndex = 17;
             this.btn_phone.Text = "更新手机";
             this.btn_phone.UseVisualStyleBackColor = true;
@@ -286,10 +287,10 @@
             // 
             // btn_link
             // 
-            this.btn_link.Location = new System.Drawing.Point(14, 268);
-            this.btn_link.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_link.Location = new System.Drawing.Point(19, 335);
+            this.btn_link.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_link.Name = "btn_link";
-            this.btn_link.Size = new System.Drawing.Size(70, 37);
+            this.btn_link.Size = new System.Drawing.Size(93, 46);
             this.btn_link.TabIndex = 18;
             this.btn_link.Text = "友情链接";
             this.btn_link.UseVisualStyleBackColor = true;
@@ -297,10 +298,10 @@
             // 
             // btn_function_setting
             // 
-            this.btn_function_setting.Location = new System.Drawing.Point(101, 268);
-            this.btn_function_setting.Margin = new System.Windows.Forms.Padding(2);
+            this.btn_function_setting.Location = new System.Drawing.Point(135, 335);
+            this.btn_function_setting.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btn_function_setting.Name = "btn_function_setting";
-            this.btn_function_setting.Size = new System.Drawing.Size(70, 37);
+            this.btn_function_setting.Size = new System.Drawing.Size(93, 46);
             this.btn_function_setting.TabIndex = 19;
             this.btn_function_setting.Text = "功能设定";
             this.btn_function_setting.UseVisualStyleBackColor = true;
@@ -308,9 +309,9 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1004, 631);
+            this.ClientSize = new System.Drawing.Size(1339, 789);
             this.Controls.Add(this.btn_function_setting);
             this.Controls.Add(this.btn_link);
             this.Controls.Add(this.btn_phone);
@@ -329,7 +330,7 @@
             this.Controls.Add(this.btn_file);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "替换";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);

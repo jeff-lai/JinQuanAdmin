@@ -29,6 +29,9 @@ namespace JinQuanAdmin.Crawler
                 options.AddArguments("--headless");
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-gpu");
+
+                options.AddExcludedArgument("enable-automation");
+                options.AddAdditionalCapability("useAutomationExtension", false);
                 //options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
                 string exePath = Properties.Settings.Default.ExePath;
 
@@ -47,6 +50,7 @@ namespace JinQuanAdmin.Crawler
 
                 }
                 _webDriver = new ChromeDriver(driverService, options, TimeSpan.FromMinutes(5));
+       
             }
             catch (Exception e)
             {
@@ -512,7 +516,10 @@ namespace JinQuanAdmin.Crawler
             var newTitle = ToDBC(title);
             var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
             string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)_webDriver;
+            string returnjs = (string)js.ExecuteScript("Object.defineProperties(navigator, {webdriver:{get:()=>undefined}});");
             _webDriver.Navigate().GoToUrl(baiduUrl);
+            
             if (first_enter)
             {
                 Thread.Sleep(3000);
@@ -540,7 +547,7 @@ namespace JinQuanAdmin.Crawler
             }
             if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
             {
-                var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match)).Text;
+                var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match),10).Text;
                 if (fisrtTxt.StartsWith(newTitle))
                 {
 

@@ -184,6 +184,7 @@ namespace JinQuanAdmin
         /// <param name="e"></param>
         private void Button1_Click(object sender, EventArgs e)
         {
+
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "请选择文件";
             dialog.Filter = "文本文件(*.txt)|*.txt";
@@ -694,6 +695,7 @@ namespace JinQuanAdmin
         /// <param name="e"></param>
         private void btn_refresh_Click(object sender, EventArgs e)
         {
+
             if (_MenuTypesSets.Count != 1 && (_MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList || _MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList))
             {
                 MessageBox.Show("请选择一个栏目,不支持多选", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -740,7 +742,6 @@ namespace JinQuanAdmin
                                 WriteLogger("没有获取到文章");
                                 return;
                             }
-                            Retry = 0;
                             BaiduSearch(proxt_address, list);
                             var topList = list.Where(s => s.Result == BaiduResponseResult.Included).ToList();
                             string includedMessage = "";
@@ -778,7 +779,7 @@ namespace JinQuanAdmin
                 }
             });
         }
-        private static int Retry = 0;
+
 
 
         private void BaiduSearch(string proxy, List<ArticleTitle> articles)
@@ -786,49 +787,49 @@ namespace JinQuanAdmin
 
             using (var baidu = new NewCrawle(proxy))
             {
-                try
-                {
 
-                    foreach (var item in articles)
+                foreach (var item in articles)
+                {
+                    try
                     {
+
+                        int retryNonefind = 0;
                         int retryCount = 0;
                         var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
-                            .Retry(10)
-                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.None).Retry(3))
+                            .RetryForever()
+                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.None && retryNonefind < 3).Retry(3))
+                            .Wrap(Policy.Handle<Exception>().Retry(3, onRetry: (exception, retryC, context) =>
+                            {
+                                WriteLogger($"标题：{item.Title},搜索异常{exception.Message},{exception.StackTrace}");
+                            }))
                             .Execute(() =>
                             {
-                                if (retryCount > 0)
+                                var r = baidu.IsBaiduRecord(item.Title);
+                                if (r == BaiduResponseResult.None)
                                 {
-                                    WriteLogger($"标题：{item.Title},重新搜索第 { retryCount} 次");
+                                    retryNonefind++;
+                                    WriteLogger($"标题：{item.Title},查无重搜索第 { retryNonefind} 次");
                                 }
-                                retryCount++;
-                                return baidu.IsBaiduRecord(item.Title);
+                                else if (r == BaiduResponseResult.IpBlackIntercept)
+                                {
+                                    retryCount++;
+                                    WriteLogger($"标题：{item.Title},IP重新搜索第 { retryCount} 次");
+                                }
+                                return r;
                             });
                         //var result = baidu.IsBaiduRecord(item.Title);                        
                         item.Result = result;
                         WriteLogger($"标题：{item.Title},收录情况:{result.GetDescription()}");
                         Thread.Sleep(300);
                     }
-
-                }
-                catch (Exception e)
-                {
-
-                    WriteLogger($"查询异常请将异常发送给管理员，{e.Message}");
-                    Retry++;
-                    if (Retry > 3)
+                    catch (Exception e)
                     {
-                        return;
+                        WriteLogger($"查询异常请将异常发送给管理员，{e.Message}");
+                        continue;
                     }
-                    else
-                    {
-                        BaiduSearch(proxy, articles);
-                    }
-
                 }
             }
         }
-
         #endregion
 
         #region 5. 锚点更新
