@@ -13,25 +13,26 @@ namespace JinQuanAdmin.Crawler
 {
     public class NewCrawle : IDisposable
     {
-        private readonly IWebDriver _webDriver;
+        private IWebDriver _webDriver;
         public NewCrawle() : this("")
         {
-
         }
+
+        public ChromeDriverService ChromeDriverService { get; set; }
+        public ChromeOptions ChromeOptions { get; set; }
         public NewCrawle(string proxy)
         {
-            var driverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
+            ChromeDriverService = ChromeDriverService.CreateDefaultService(Environment.CurrentDirectory + "/Package");
             try
             {
+                ChromeOptions = new ChromeOptions();
+                ChromeDriverService.HideCommandPromptWindow = true;
+                ChromeOptions.AddArguments("--headless");
+                ChromeOptions.AddArgument("no-sandbox");
+                ChromeOptions.AddArgument("--disable-gpu");
 
-                var options = new ChromeOptions();
-                driverService.HideCommandPromptWindow = true;
-                options.AddArguments("--headless");
-                options.AddArgument("no-sandbox");
-                options.AddArgument("--disable-gpu");
-
-                options.AddExcludedArgument("enable-automation");
-                options.AddAdditionalCapability("useAutomationExtension", false);
+                ChromeOptions.AddExcludedArgument("enable-automation");
+                ChromeOptions.AddAdditionalCapability("useAutomationExtension", false);
                 //options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);//禁止加载图片
                 string exePath = Properties.Settings.Default.ExePath;
 
@@ -41,20 +42,20 @@ namespace JinQuanAdmin.Crawler
                     {
                         throw new Exception("未找到浏览器路径");
                     }
-                    options.BinaryLocation = exePath;
+                    ChromeOptions.BinaryLocation = exePath;
                 }
                 if (!string.IsNullOrEmpty(proxy))
                 {
                     //var proxyIpAddress = "tps111.kdlapi.com:15818"; //_proxyProvider.GetProxyIpAddress();
-                    options.AddArgument("--proxy-server=http://" + proxy);
+                    ChromeOptions.AddArgument("--proxy-server=http://" + proxy);
 
                 }
-                _webDriver = new ChromeDriver(driverService, options, TimeSpan.FromMinutes(5));
+                _webDriver = new ChromeDriver(ChromeDriverService, ChromeOptions, TimeSpan.FromMinutes(5));
 
             }
             catch (Exception e)
             {
-                driverService.Dispose();
+                ChromeDriverService.Dispose();
                 LogHelper.LogAction.Invoke($"浏览器启动失败");
                 throw e;
             }
@@ -570,6 +571,7 @@ namespace JinQuanAdmin.Crawler
             catch (Exception exception)
             {
                 LogHelper.LogAction.Invoke($"标题：{title},搜索异常{exception.Message},{exception.StackTrace}");
+                _webDriver = new ChromeDriver(ChromeDriverService, ChromeOptions, TimeSpan.FromMinutes(5));
                 return BaiduResponseResult.Exception;
             }
         }
