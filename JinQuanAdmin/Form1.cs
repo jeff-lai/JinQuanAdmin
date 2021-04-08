@@ -695,7 +695,7 @@ namespace JinQuanAdmin
         /// <param name="e"></param>
         private void btn_refresh_Click(object sender, EventArgs e)
         {
-
+       
             if (_MenuTypesSets.Count != 1 && (_MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList || _MenuTypesSets.FirstOrDefault() != MenuType.WholesaleList))
             {
                 MessageBox.Show("请选择一个栏目,不支持多选", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -734,15 +734,22 @@ namespace JinQuanAdmin
                                 continue;
                             };
 
-                            int total;
+                            int total = 0;
                             int pageTotal;
+
                             var list = crawle.GetArticlesTitles(_MenuTypesSets.First(), -1, out total, out pageTotal);
                             if (!list.Any())
                             {
                                 WriteLogger("没有获取到文章");
                                 return;
                             }
-                            BaiduSearch(proxt_address, list);
+                                                
+                            BaiduSearch(proxt_address, list, a =>
+                             {
+                                 List<ArticleTitle> one = new List<ArticleTitle>() { a };
+                                 crawle.RefreshSetTop(one, _MenuTypesSets.First());
+
+                             });
                             var topList = list.Where(s => s.Result == BaiduResponseResult.Included).ToList();
                             string includedMessage = "";
                             if (topList == null || !topList.Any())
@@ -782,26 +789,22 @@ namespace JinQuanAdmin
 
 
 
-        private void BaiduSearch(string proxy, List<ArticleTitle> articles)
+        private void BaiduSearch(string proxy, List<ArticleTitle> articles, Action<ArticleTitle> action)
         {
 
             using (var baidu = new NewCrawle(proxy))
             {
 
                 foreach (var item in articles)
-                {
+                {                    
                     try
                     {
-
                         int retryNonefind = 0;
                         int retryCount = 0;
                         var result = Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.IpBlackIntercept)
                             .RetryForever()
-                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.None && retryNonefind < 3).Retry(3))
-                            .Wrap(Policy.Handle<Exception>().Retry(3, onRetry: (exception, retryC, context) =>
-                            {
-                                WriteLogger($"标题：{item.Title},搜索异常{exception.Message},{exception.StackTrace}");
-                            }))
+                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.None && retryNonefind < 3).Retry(3))                   
+                            .Wrap(Policy.HandleResult<BaiduResponseResult>(r => r == BaiduResponseResult.Exception).Retry(1))                                  
                             .Execute(() =>
                             {
                                 var r = baidu.IsBaiduRecord(item.Title);
@@ -814,6 +817,10 @@ namespace JinQuanAdmin
                                 {
                                     retryCount++;
                                     WriteLogger($"标题：{item.Title},IP重新搜索第 { retryCount} 次");
+                                }
+                                if (r == BaiduResponseResult.Included)
+                                {
+                                    action(item);
                                 }
                                 return r;
                             });

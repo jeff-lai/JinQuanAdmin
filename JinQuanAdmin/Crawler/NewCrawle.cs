@@ -50,7 +50,7 @@ namespace JinQuanAdmin.Crawler
 
                 }
                 _webDriver = new ChromeDriver(driverService, options, TimeSpan.FromMinutes(5));
-       
+
             }
             catch (Exception e)
             {
@@ -512,57 +512,66 @@ namespace JinQuanAdmin.Crawler
         /// <returns></returns>
         public BaiduResponseResult IsBaiduRecord(string title)
         {
+            try
+            {
 
-            var newTitle = ToDBC(title);
-            var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
-            string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
-            IJavaScriptExecutor js = (IJavaScriptExecutor)_webDriver;
-            string returnjs = (string)js.ExecuteScript("Object.defineProperties(navigator, {webdriver:{get:()=>undefined}});");
-            _webDriver.Navigate().GoToUrl(baiduUrl);
-            
-            if (first_enter)
-            {
-                Thread.Sleep(3000);
-                first_enter = false;
-            }
-            else
-            {
-                Thread.Sleep(1000);
-            }
-            if (_webDriver.Url.Contains("wappass"))
-            {
-                return BaiduResponseResult.IpBlackIntercept;
-            }
-            if (_webDriver.PageSource.Length < 100)
-            {
-                return BaiduResponseResult.ProxyException;
-            }
-            if (!_webDriver.IsElementExist(By.Id("container")))
-            {
-                return BaiduResponseResult.IpBlackIntercept;
-            }
-            if (newTitle.Length > 27)
-            {
-                newTitle = newTitle.Substring(0, 27);
-            }
-            if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
-            {
-                var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match),10).Text;
-                if (fisrtTxt.StartsWith(newTitle))
-                {
 
-                    return BaiduResponseResult.Included;
-                }
-            }
-            var titles = _webDriver.FindElements(By.XPath(baidu_rows));
-            foreach (var item in titles)
-            {
-                if (item.Text.StartsWith(newTitle))
+                var newTitle = ToDBC(title);
+                var kw = System.Web.HttpUtility.UrlEncode(newTitle, System.Text.Encoding.UTF8);
+                string baiduUrl = $"https://www.baidu.com/s?wd={kw}";
+                IJavaScriptExecutor js = (IJavaScriptExecutor)_webDriver;
+                string returnjs = (string)js.ExecuteScript("Object.defineProperties(navigator, {webdriver:{get:()=>undefined}});");
+                _webDriver.Navigate().GoToUrl(baiduUrl);
+
+                if (first_enter)
                 {
-                    return BaiduResponseResult.Included;
+                    Thread.Sleep(3000);
+                    first_enter = false;
                 }
+                else
+                {
+                    Thread.Sleep(1000);
+                }
+                if (_webDriver.Url.Contains("wappass"))
+                {
+                    return BaiduResponseResult.IpBlackIntercept;
+                }
+                if (_webDriver.PageSource.Length < 100)
+                {
+                    return BaiduResponseResult.ProxyException;
+                }
+                if (!_webDriver.IsElementExist(By.Id("container")))
+                {
+                    return BaiduResponseResult.IpBlackIntercept;
+                }
+                if (newTitle.Length > 27)
+                {
+                    newTitle = newTitle.Substring(0, 27);
+                }
+                if (_webDriver.IsElementExist(By.XPath(baidu_first_match)))
+                {
+                    var fisrtTxt = _webDriver.FindElement(By.XPath(baidu_first_match), 10).Text;
+                    if (fisrtTxt.StartsWith(newTitle))
+                    {
+
+                        return BaiduResponseResult.Included;
+                    }
+                }
+                var titles = _webDriver.FindElements(By.XPath(baidu_rows));
+                foreach (var item in titles)
+                {
+                    if (item.Text.StartsWith(newTitle))
+                    {
+                        return BaiduResponseResult.Included;
+                    }
+                }
+                return BaiduResponseResult.None;
             }
-            return BaiduResponseResult.None;
+            catch (Exception exception)
+            {
+                LogHelper.LogAction.Invoke($"标题：{title},搜索异常{exception.Message},{exception.StackTrace}");
+                return BaiduResponseResult.Exception;
+            }
         }
 
         private string row_ck_name = "cbproduce";
