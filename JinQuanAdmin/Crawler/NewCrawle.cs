@@ -26,8 +26,8 @@ namespace JinQuanAdmin.Crawler
             try
             {
                 ChromeOptions = new ChromeOptions();
-                //ChromeDriverService.HideCommandPromptWindow = true;
-                //ChromeOptions.AddArguments("--headless");
+                ChromeDriverService.HideCommandPromptWindow = true;
+                ChromeOptions.AddArguments("--headless");
                 ChromeOptions.AddArgument("no-sandbox");
                 ChromeOptions.AddArgument("--disable-gpu");
 
