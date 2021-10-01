@@ -26,8 +26,8 @@ namespace JinQuanAdmin.Crawler
             try
             {
                 ChromeOptions = new ChromeOptions();
-                ChromeDriverService.HideCommandPromptWindow = true;
-                ChromeOptions.AddArguments("--headless");
+                //ChromeDriverService.HideCommandPromptWindow = true;
+                //ChromeOptions.AddArguments("--headless");
                 ChromeOptions.AddArgument("no-sandbox");
                 ChromeOptions.AddArgument("--disable-gpu");
 
@@ -183,7 +183,7 @@ namespace JinQuanAdmin.Crawler
             }
         }
 
-        private string article_id_xpath = "//table//td//tr//td[last()]//a";
+        private string article_id_xpath = "//table//td[@class='tdPosi']/span/a[1]";
         private int pageSize = 16;
         private string pagecount_xpath = "//form//font[@color='red']";
         /// <summary>
@@ -296,7 +296,8 @@ namespace JinQuanAdmin.Crawler
                         {
                             ArticleTitle articleTitle = new ArticleTitle();
                             articleTitle.Value = firstValueList[i].GetAttribute("value");
-                            articleTitle.Title = firstTitleList[i].Text;
+                            string title = firstTitleList[i].Text;
+                            articleTitle.Title = title.Substring(0, title.IndexOf("\r\n"));
                             list.Add(articleTitle);
                         }
                     }
